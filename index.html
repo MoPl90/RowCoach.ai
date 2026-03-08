@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>🚣 Schlagzahlmesser</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;
+  background:#050505;color:#fff;
+  height:100vh;height:100dvh;
+  display:flex;flex-direction:column;
+  padding:.6rem .8rem .8rem;
+  user-select:none;-webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  overflow:hidden;
+}
+.flash{position:fixed;inset:0;background:#4ade80;opacity:0;pointer-events:none;transition:opacity .1s}
+.flash.on{opacity:.1}
+
+.hdr{text-align:center;padding:.2rem 0}
+.hdr h1{font-size:.6rem;font-weight:600;color:#4b5563;letter-spacing:.2em;text-transform:uppercase}
+
+.main{display:flex;flex-direction:column;align-items:center;padding:.15rem 0}
+.rn{font-size:min(8.5rem,25vw);font-weight:800;line-height:.85;font-variant-numeric:tabular-nums;transition:color .3s}
+.c0{color:#374151}.c1{color:#4ade80}.c2{color:#facc15}.c3{color:#f87171}
+.rl{font-size:.7rem;color:#6b7280;margin-top:.2rem;font-weight:500}
+.bw{width:7rem;height:3px;background:#1f2937;border-radius:99px;margin-top:.4rem;overflow:hidden}
+.bi{height:100%;width:0;background:#22c55e;border-radius:99px;transition:width .07s}
+
+.stats{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:1px;background:#1a1a2e;
+  border-radius:.7rem;overflow:hidden;
+  width:100%;margin:.35rem 0;
+}
+.st{background:#0a0a14;padding:.45rem .2rem;text-align:center}
+.st-v{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums;color:#e5e7eb;line-height:1.15}
+.st-u{font-size:.55rem;color:#6b7280}
+.st-l{font-size:.47rem;color:#4b5563;text-transform:uppercase;letter-spacing:.08em;margin-top:.08rem}
+.st.hl .st-v{color:#4ade80;font-size:1.35rem}
+
+.map-wrap{
+  flex:1;min-height:60px;
+  border-radius:.7rem;overflow:hidden;
+  position:relative;background:#0a0a14;
+  margin:.3rem 0;
+}
+#map{width:100%;height:100%;z-index:1}
+.mm{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;color:#4b5563;z-index:2;pointer-events:none;
+}
+
+.ctrl{display:flex;flex-direction:column;align-items:center;gap:.25rem}
+.sr{display:flex;align-items:center;gap:.4rem;width:100%;max-width:16rem;font-size:.55rem;color:#4b5563}
+.sr input{flex:1;accent-color:#22c55e;height:1rem}
+.svl{width:1.5rem;text-align:right;font-variant-numeric:tabular-nums}
+.bm{
+  width:100%;max-width:16rem;height:3rem;
+  border-radius:.7rem;border:none;
+  font-size:.95rem;font-weight:700;letter-spacing:.1em;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;
+  transition:background .08s;
+}
+.bg{background:#16a34a;color:#fff;box-shadow:0 4px 14px rgba(22,163,74,.3)}
+.bg:active{background:#22c55e}
+.bs{background:#dc2626;color:#fff;box-shadow:0 4px 14px rgba(220,38,38,.2)}
+.bs:active{background:#f87171}
+.br{background:none;border:none;color:#4b5563;font-size:.6rem;cursor:pointer;padding:.25rem .6rem;display:flex;align-items:center;gap:.2rem}
+.br:active{color:#9ca3af}
+.sx{font-size:.52rem;color:#4b5563;text-align:center;min-height:.7rem}
+.sx.ok{color:#22c55e}
+.sx.er{color:#f87171}
+.pulse{animation:p 1.5s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+
+.leaflet-container{background:#0a0a14!important}
+.leaflet-control-attribution{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="flash" id="flash"></div>
+
+<div class="hdr"><h1>🚣 Schlagzahlmesser</h1></div>
+
+<div class="main">
+  <div class="rn c0" id="rate">0</div>
+  <div class="rl">Schläge / min</div>
+  <div class="bw" id="bw" style="visibility:hidden"><div class="bi" id="bf"></div></div>
+</div>
+
+<div class="stats">
+  <div class="st hl">
+    <div class="st-v" id="split">–:––</div>
+    <div class="st-l">/500m Split</div>
+  </div>
+  <div class="st">
+    <div class="st-v" id="time">00:00</div>
+    <div class="st-l">Zeit</div>
+  </div>
+  <div class="st">
+    <div class="st-v"><span id="dist">0</span><span class="st-u" id="du"> m</span></div>
+    <div class="st-l">Distanz</div>
+  </div>
+  <div class="st">
+    <div class="st-v" id="avgR">0</div>
+    <div class="st-l">Ø Schlagzahl</div>
+  </div>
+  <div class="st">
+    <div class="st-v"><span id="dps">0.0</span><span class="st-u"> m</span></div>
+    <div class="st-l">m / Schlag</div>
+  </div>
+  <div class="st">
+    <div class="st-v"><span id="spd">0.0</span><span class="st-u"> km/h</span></div>
+    <div class="st-l">Tempo</div>
+  </div>
+</div>
+
+<div class="map-wrap">
+  <div class="mm" id="mapMsg">📍 Karte erscheint mit GPS-Signal</div>
+  <div id="map"></div>
+</div>
+
+<div class="ctrl">
+  <div class="sr" id="sr" style="visibility:hidden">
+    <span>Empfindl.</span>
+    <input type="range" id="ss" min="1" max="10" step="0.5" value="3">
+    <span class="svl" id="svl">3</span>
+  </div>
+  <button class="bm bg" id="btn">▶︎&ensp;START</button>
+  <div class="sx" id="stx">&nbsp;</div>
+  <button class="br" id="rst">↺ Zurücksetzen</button>
+</div>
+
+<script>
+/* ── State ──────────────────────────── */
+let app='idle',sRate=0,sCount=0,tDist=0,elapsed=0;
+let runStart=null,pauseAccum=0;
+let sens=3,smoothed=0,isAbove=false,lastStrokeT=0,recent=[];
+let sOk=false,sOn=false;
+let gpsId=null,lastGps=null,gpsGot=false;
+let tickId=null,decayId=null,wakeLock=null;
+let lastVis=0,curSpd=0;
+let gHist=[],tPts=[];
+let map=null,tLine=null,pMark=null,mapOk=false;
+
+/* ── DOM ────────────────────────────── */
+const $=id=>document.getElementById(id);
+const eR=$('rate'),eSp=$('split'),eT=$('time'),eD=$('dist'),eDu=$('du');
+const eA=$('avgR'),eDps=$('dps'),eSpd=$('spd');
+const eF=$('flash'),eBf=$('bf'),eBw=$('bw');
+const eBtn=$('btn'),eSt=$('stx'),eSr=$('sr'),eSvl=$('svl'),eMm=$('mapMsg');
+
+$('ss').addEventListener('input',e=>{sens=parseFloat(e.target.value);eSvl.textContent=e.target.value});
+document.addEventListener('dblclick',e=>e.preventDefault());
+
+/* ── Map ────────────────────────────── */
+function initMap(lat,lon){
+  if(mapOk)return;mapOk=true;eMm.style.display='none';
+  map=L.map('map',{zoomControl:false,attributionControl:false,dragging:false,
+    scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false,boxZoom:false,
+    keyboard:false,tap:false}).setView([lat,lon],16);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
+  tLine=L.polyline([],{color:'#4ade80',weight:3,opacity:.8}).addTo(map);
+  pMark=L.circleMarker([lat,lon],{radius:6,color:'#fff',fillColor:'#22c55e',fillOpacity:1,weight:2}).addTo(map);
+  setTimeout(()=>map.invalidateSize(),200);
+}
+function updMap(lat,lon){
+  if(!mapOk)initMap(lat,lon);
+  tLine.setLatLngs(tPts);pMark.setLatLng([lat,lon]);
+  if(tPts.length>2){map.fitBounds(tLine.getBounds().pad(.15),{animate:false,maxZoom:17})}
+  else{map.setView([lat,lon],16,{animate:false})}
+}
+
+/* ── UI ─────────────────────────────── */
+function fmtT(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function fmtSplit(v){
+  if(v<.3)return'–:––';
+  const t=500/v;if(t>600)return'–:––';
+  const m=Math.floor(t/60),s=t%60;
+  return m+':'+String(Math.floor(s)).padStart(2,'0')+'.'+Math.floor((s%1)*10);
+}
+function ui(){
+  eR.textContent=sRate;
+  eR.className='rn '+(sRate===0?'c0':sRate<22?'c1':sRate<32?'c2':'c3');
+  const mins=elapsed/60;
+  eA.textContent=(mins>0&&sCount>0)?Math.round(sCount/mins):0;
+  eT.textContent=fmtT(elapsed);
+  if(tDist>=1000){eD.textContent=(tDist/1000).toFixed(2);eDu.textContent=' km'}
+  else{eD.textContent=Math.round(tDist);eDu.textContent=' m'}
+  eDps.textContent=sCount>0?(tDist/sCount).toFixed(1):'0.0';
+  eSp.textContent=fmtSplit(curSpd);
+  eSpd.textContent=(curSpd*3.6).toFixed(1);
+}
+
+/* ── Stroke ─────────────────────────── */
+function stroke(now){
+  if(app!=='running')return;
+  if(now-lastStrokeT<1200)return;
+  lastStrokeT=now;sCount++;
+  recent.push(now);if(recent.length>8)recent.shift();
+  eF.classList.add('on');setTimeout(()=>eF.classList.remove('on'),100);
+  if(recent.length>=2){
+    let s=0;for(let i=1;i<recent.length;i++)s+=recent[i]-recent[i-1];
+    sRate=Math.min(Math.round(60000/(s/(recent.length-1))),60);
+  }
+  clearTimeout(decayId);decayId=setTimeout(()=>{sRate=0;ui()},5000);
+  ui();
+}
+
+/* ── Accel ──────────────────────────── */
+function onMot(e){
+  const a=e.acceleration||e.accelerationIncludingGravity;if(!a)return;
+  let mag=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2);
+  if(!e.acceleration)mag=Math.abs(mag-9.81);
+  smoothed=.3*mag+.7*smoothed;
+  const now=Date.now();
+  if(now-lastVis>80){lastVis=now;eBf.style.width=Math.min(100,(smoothed/(sens*2))*100)+'%'}
+  if(!isAbove&&smoothed>sens){isAbove=true;stroke(now)}
+  else if(isAbove&&smoothed<sens*.4){isAbove=false}
+}
+async function initSens(){
+  if(sOk)return true;
+  if(!window.DeviceMotionEvent)return false;
+  if(typeof DeviceMotionEvent.requestPermission==='function'){
+    try{const p=await DeviceMotionEvent.requestPermission();if(p==='granted'){sOk=true;return true}return false}catch{return false}
+  }
+  sOk=true;return true;
+}
+function sensStart(){
+  if(sOn)return;window.addEventListener('devicemotion',onMot);
+  sOn=true;eBw.style.visibility='visible';eSr.style.visibility='visible';
+}
+
+/* ── GPS ────────────────────────────── */
+function hav(a1,o1,a2,o2){
+  const R=6371000,r=x=>x*Math.PI/180,dA=r(a2-a1),dO=r(o2-o1);
+  const h=Math.sin(dA/2)**2+Math.cos(r(a1))*Math.cos(r(a2))*Math.sin(dO/2)**2;
+  return R*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));
+}
+function onPos(p){
+  if(app!=='running')return;
+  const{latitude:lat,longitude:lon,accuracy:acc,speed:gs}=p.coords;
+  if(acc>30)return;
+  if(lastGps){
+    const d=hav(lastGps.lat,lastGps.lon,lat,lon);
+    if(d>1.5&&d<100)tDist+=d;
+  }
+  lastGps={lat,lon};tPts.push([lat,lon]);updMap(lat,lon);
+  const now=Date.now();
+  gHist.push({t:now,d:tDist});
+  while(gHist.length>1&&now-gHist[0].t>12000)gHist.shift();
+  if(gHist.length>=2){
+    const f=gHist[0],l=gHist[gHist.length-1],dt=(l.t-f.t)/1000;
+    if(dt>2)curSpd=Math.max(0,(l.d-f.d)/dt);
+  }
+  if(gs!=null&&gs>.3){curSpd=curSpd*.6+gs*.4}
+  if(!gpsGot){gpsGot=true;updSt()}
+  ui();
+}
+function gpsOn(){
+  if(!navigator.geolocation||gpsId!==null)return;
+  gpsId=navigator.geolocation.watchPosition(onPos,()=>{},{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
+}
+function gpsOff(){if(gpsId!==null){navigator.geolocation.clearWatch(gpsId);gpsId=null}lastGps=null}
+
+/* ── Wake Lock ──────────────────────── */
+async function wlOn(){try{if('wakeLock'in navigator)wakeLock=await navigator.wakeLock.request('screen')}catch{}}
+function wlOff(){if(wakeLock){wakeLock.release();wakeLock=null}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&app==='running')wlOn()});
+
+/* ── Timer ──────────────────────────── */
+function tickOn(){
+  if(tickId)return;
+  tickId=setInterval(()=>{if(app==='running'&&runStart){elapsed=pauseAccum+Math.floor((Date.now()-runStart)/1000);ui()}},1000);
+}
+function tickOff(){clearInterval(tickId);tickId=null}
+
+/* ── Status ─────────────────────────── */
+function updSt(){
+  if(app==='running'){
+    const g=gpsGot?'GPS ✓':'GPS …';
+    eSt.innerHTML='<span class="pulse">●</span> Aufzeichnung · '+g;eSt.className='sx ok';
+  }else if(app==='paused'){
+    eSt.textContent='⏸ Pausiert';eSt.className='sx';
+  }else{eSt.innerHTML='&nbsp;';eSt.className='sx'}
+}
+
+/* ── Main Button ────────────────────── */
+eBtn.addEventListener('pointerdown',async e=>{
+  e.preventDefault();
+  if(app==='idle'||app==='paused'){
+    const ok=await initSens();
+    if(!ok){eSt.textContent='❌ Sensor nicht verfügbar / verweigert';eSt.className='sx er';return}
+    sensStart();
+    if(app==='idle'){runStart=Date.now();pauseAccum=0}
+    else{pauseAccum=elapsed;runStart=Date.now()}
+    app='running';gpsOn();tickOn();wlOn();
+    eBtn.textContent='⏸  STOP';eBtn.className='bm bs';updSt();
+  }else{
+    app='paused';elapsed=pauseAccum+Math.floor((Date.now()-runStart)/1000);
+    gpsOff();tickOff();wlOff();
+    eBtn.textContent='▶︎  WEITER';eBtn.className='bm bg';updSt();ui();
+  }
+});
+
+/* ── Reset ──────────────────────────── */
+$('rst').addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  app='idle';sRate=0;sCount=0;tDist=0;elapsed=0;curSpd=0;
+  runStart=null;pauseAccum=0;
+  smoothed=0;isAbove=false;lastStrokeT=0;recent=[];
+  lastGps=null;gpsGot=false;gHist=[];tPts=[];
+  gpsOff();tickOff();wlOff();clearTimeout(decayId);
+  if(tLine)tLine.setLatLngs([]);
+  eBtn.textContent='▶︎  START';eBtn.className='bm bg';
+  eBf.style.width='0';updSt();ui();
+});
+
+ui();
+</script>
+</body>
+</html>
