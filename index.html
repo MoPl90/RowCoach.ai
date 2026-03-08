@@ -80,6 +80,22 @@ body{
 .pulse{animation:p 1.5s ease-in-out infinite}
 @keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
 
+/* Permission overlay */
+.perm-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;padding:2rem;text-align:center;
+}
+.perm-overlay h2{font-size:1.2rem;margin-bottom:.5rem}
+.perm-overlay p{font-size:.75rem;color:#9ca3af;margin-bottom:1.5rem;max-width:18rem;line-height:1.5}
+.perm-btn{
+  background:#16a34a;color:#fff;border:none;border-radius:.7rem;
+  padding:.9rem 2.5rem;font-size:1rem;font-weight:700;cursor:pointer;
+  letter-spacing:.05em;
+}
+.perm-btn:active{background:#22c55e}
+.perm-skip{background:none;border:none;color:#4b5563;font-size:.65rem;cursor:pointer;margin-top:.8rem}
+
 .leaflet-container{background:#0a0a14!important}
 .leaflet-control-attribution{display:none!important}
 </style>
@@ -87,6 +103,14 @@ body{
 <body>
 
 <div class="flash" id="flash"></div>
+
+<!-- Permission Overlay -->
+<div class="perm-overlay" id="permOverlay">
+  <h2>🚣 Schlagzahlmesser</h2>
+  <p>Die App benötigt Zugriff auf den <strong>Bewegungssensor</strong> (Schlagzählung) und <strong>GPS</strong> (Strecke &amp; Tempo).<br><br>Bitte erlaube beides im nächsten Schritt.</p>
+  <button class="perm-btn" id="permBtn">Berechtigungen erteilen</button>
+  <button class="perm-skip" id="permSkip">Überspringen</button>
+</div>
 
 <div class="hdr"><h1>🚣 Schlagzahlmesser</h1></div>
 
@@ -144,7 +168,7 @@ body{
 let app='idle',sRate=0,sCount=0,tDist=0,elapsed=0;
 let runStart=null,pauseAccum=0;
 let sens=3,smoothed=0,isAbove=false,lastStrokeT=0,recent=[];
-let sOk=false,sOn=false;
+let sOk=false,sOn=false,gpsPermOk=false;
 let gpsId=null,lastGps=null,gpsGot=false;
 let tickId=null,decayId=null,wakeLock=null;
 let lastVis=0,curSpd=0;
@@ -157,9 +181,53 @@ const eR=$('rate'),eSp=$('split'),eT=$('time'),eD=$('dist'),eDu=$('du');
 const eA=$('avgR'),eDps=$('dps'),eSpd=$('spd');
 const eF=$('flash'),eBf=$('bf'),eBw=$('bw');
 const eBtn=$('btn'),eSt=$('stx'),eSr=$('sr'),eSvl=$('svl'),eMm=$('mapMsg');
+const ePerm=$('permOverlay'),ePermBtn=$('permBtn'),ePermSkip=$('permSkip');
 
 $('ss').addEventListener('input',e=>{sens=parseFloat(e.target.value);eSvl.textContent=e.target.value});
 document.addEventListener('dblclick',e=>e.preventDefault());
+
+/* ── Permission Overlay ─────────────── */
+ePermBtn.addEventListener('click', async ()=>{
+  // Request motion permission (iOS)
+  if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
+    try{
+      const p=await DeviceMotionEvent.requestPermission();
+      if(p==='granted')sOk=true;
+    }catch(e){console.warn('Motion permission error',e)}
+  }else if(window.DeviceMotionEvent){
+    sOk=true;
+  }
+
+  // Request GPS permission by doing a one-shot position request
+  if(navigator.geolocation){
+    try{
+      await new Promise((res,rej)=>{
+        navigator.geolocation.getCurrentPosition(
+          pos=>{gpsPermOk=true;res(pos)},
+          err=>{console.warn('GPS error',err);rej(err)},
+          {enableHighAccuracy:true,timeout:10000}
+        );
+      });
+    }catch(e){}
+  }
+
+  ePerm.style.display='none';
+  updatePermStatus();
+});
+
+ePermSkip.addEventListener('click',()=>{
+  ePerm.style.display='none';
+});
+
+function updatePermStatus(){
+  let parts=[];
+  if(sOk)parts.push('Sensor ✓');
+  else parts.push('Sensor ✗');
+  if(gpsPermOk)parts.push('GPS ✓');
+  else parts.push('GPS ✗');
+  eSt.textContent=parts.join(' · ');
+  eSt.className='sx '+(sOk&&gpsPermOk?'ok':sOk||gpsPermOk?'ok':'er');
+}
 
 /* ── Map ────────────────────────────── */
 function initMap(lat,lon){
@@ -226,16 +294,9 @@ function onMot(e){
   if(!isAbove&&smoothed>sens){isAbove=true;stroke(now)}
   else if(isAbove&&smoothed<sens*.4){isAbove=false}
 }
-async function initSens(){
-  if(sOk)return true;
-  if(!window.DeviceMotionEvent)return false;
-  if(typeof DeviceMotionEvent.requestPermission==='function'){
-    try{const p=await DeviceMotionEvent.requestPermission();if(p==='granted'){sOk=true;return true}return false}catch{return false}
-  }
-  sOk=true;return true;
-}
 function sensStart(){
-  if(sOn)return;window.addEventListener('devicemotion',onMot);
+  if(sOn||!sOk)return;
+  window.addEventListener('devicemotion',onMot);
   sOn=true;eBw.style.visibility='visible';eSr.style.visibility='visible';
 }
 
@@ -287,19 +348,30 @@ function tickOff(){clearInterval(tickId);tickId=null}
 function updSt(){
   if(app==='running'){
     const g=gpsGot?'GPS ✓':'GPS …';
-    eSt.innerHTML='<span class="pulse">●</span> Aufzeichnung · '+g;eSt.className='sx ok';
+    const s=sOk?'Sensor ✓':'Sensor ✗';
+    eSt.innerHTML='<span class="pulse">●</span> Aufzeichnung · '+s+' · '+g;eSt.className='sx ok';
   }else if(app==='paused'){
     eSt.textContent='⏸ Pausiert';eSt.className='sx';
   }else{eSt.innerHTML='&nbsp;';eSt.className='sx'}
 }
 
-/* ── Main Button ────────────────────── */
-eBtn.addEventListener('pointerdown',async e=>{
-  e.preventDefault();
+/* ── Main Button (click for permission compat) ── */
+eBtn.addEventListener('click', async ()=>{
   if(app==='idle'||app==='paused'){
-    const ok=await initSens();
-    if(!ok){eSt.textContent='❌ Sensor nicht verfügbar / verweigert';eSt.className='sx er';return}
-    sensStart();
+    // If sensor not yet permitted, try again from this click gesture
+    if(!sOk){
+      if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
+        try{
+          const p=await DeviceMotionEvent.requestPermission();
+          if(p==='granted')sOk=true;
+        }catch(e){}
+      }else if(window.DeviceMotionEvent){
+        sOk=true;
+      }
+    }
+
+    if(sOk)sensStart();
+
     if(app==='idle'){runStart=Date.now();pauseAccum=0}
     else{pauseAccum=elapsed;runStart=Date.now()}
     app='running';gpsOn();tickOn();wlOn();
@@ -312,8 +384,7 @@ eBtn.addEventListener('pointerdown',async e=>{
 });
 
 /* ── Reset ──────────────────────────── */
-$('rst').addEventListener('pointerdown',e=>{
-  e.preventDefault();
+$('rst').addEventListener('click',()=>{
   app='idle';sRate=0;sCount=0;tDist=0;elapsed=0;curSpd=0;
   runStart=null;pauseAccum=0;
   smoothed=0;isAbove=false;lastStrokeT=0;recent=[];
