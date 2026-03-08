@@ -1,253 +1,839 @@
 <!DOCTYPE html>
+
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>🚣 Schlagzahlmesser</title>
+<title>Schlagzahl</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <style>
+:root {
+  --black:  #000000;
+  --white:  #ffffff;
+  --g1:     #111111;
+  --g2:     #1f1f1f;
+  --g3:     #2e2e2e;
+  --g4:     #888888;
+  --g5:     #bbbbbb;
+  --red:    #ff2222;
+  --font:   'Barlow Condensed','Helvetica Neue',Arial,sans-serif;
+  --fontb:  'Barlow','Helvetica Neue',Arial,sans-serif;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;
-  background:#050505;color:#fff;
-  height:100vh;height:100dvh;
-  display:flex;flex-direction:column;
-  padding:.6rem .8rem .8rem;
+html,body{
+  width:100%;height:100%;height:100dvh;
+  overflow:hidden;background:var(--black);color:var(--white);
+  font-family:var(--font);
   user-select:none;-webkit-user-select:none;
   -webkit-tap-highlight-color:transparent;
-  overflow:hidden;
-}
-.flash{position:fixed;inset:0;background:#4ade80;opacity:0;pointer-events:none;transition:opacity .1s}
-.flash.on{opacity:.1}
-
-.hdr{text-align:center;padding:.2rem 0}
-.hdr h1{font-size:.6rem;font-weight:600;color:#4b5563;letter-spacing:.2em;text-transform:uppercase}
-
-.main{display:flex;flex-direction:column;align-items:center;padding:.15rem 0}
-.rn{font-size:min(8.5rem,25vw);font-weight:800;line-height:.85;font-variant-numeric:tabular-nums;transition:color .3s}
-.c0{color:#374151}.c1{color:#4ade80}.c2{color:#facc15}.c3{color:#f87171}
-.rl{font-size:.7rem;color:#6b7280;margin-top:.2rem;font-weight:500}
-.bw{width:7rem;height:3px;background:#1f2937;border-radius:99px;margin-top:.4rem;overflow:hidden}
-.bi{height:100%;width:0;background:#22c55e;border-radius:99px;transition:width .07s}
-
-.stats{
-  display:grid;grid-template-columns:1fr 1fr 1fr;
-  gap:1px;background:#1a1a2e;
-  border-radius:.7rem;overflow:hidden;
-  width:100%;margin:.35rem 0;
-}
-.st{background:#0a0a14;padding:.45rem .2rem;text-align:center}
-.st-v{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums;color:#e5e7eb;line-height:1.15}
-.st-u{font-size:.55rem;color:#6b7280}
-.st-l{font-size:.47rem;color:#4b5563;text-transform:uppercase;letter-spacing:.08em;margin-top:.08rem}
-.st.hl .st-v{color:#4ade80;font-size:1.35rem}
-
-.map-wrap{
-  flex:1;min-height:60px;
-  border-radius:.7rem;overflow:hidden;
-  position:relative;background:#0a0a14;
-  margin:.3rem 0;
-}
-#map{width:100%;height:100%;z-index:1}
-.mm{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:.65rem;color:#4b5563;z-index:2;pointer-events:none;
 }
 
-.ctrl{display:flex;flex-direction:column;align-items:center;gap:.25rem}
-.sr{display:flex;align-items:center;gap:.4rem;width:100%;max-width:16rem;font-size:.55rem;color:#4b5563}
-.sr input{flex:1;accent-color:#22c55e;height:1rem}
-.svl{width:1.5rem;text-align:right;font-variant-numeric:tabular-nums}
-.bm{
-  width:100%;max-width:16rem;height:3rem;
-  border-radius:.7rem;border:none;
-  font-size:.95rem;font-weight:700;letter-spacing:.1em;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;
-  transition:background .08s;
-}
-.bg{background:#16a34a;color:#fff;box-shadow:0 4px 14px rgba(22,163,74,.3)}
-.bg:active{background:#22c55e}
-.bs{background:#dc2626;color:#fff;box-shadow:0 4px 14px rgba(220,38,38,.2)}
-.bs:active{background:#f87171}
-.br{background:none;border:none;color:#4b5563;font-size:.6rem;cursor:pointer;padding:.25rem .6rem;display:flex;align-items:center;gap:.2rem}
-.br:active{color:#9ca3af}
-.sx{font-size:.52rem;color:#4b5563;text-align:center;min-height:.7rem}
-.sx.ok{color:#22c55e}
-.sx.er{color:#f87171}
-.pulse{animation:p 1.5s ease-in-out infinite}
-@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+/* flash */
+.flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .06s;z-index:999}
+.flash.on{opacity:.04}
 
-/* Permission overlay */
-.perm-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.85);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:9999;padding:2rem;text-align:center;
+/* ── perm overlay ── */
+.perm{
+position:fixed;inset:0;background:var(–black);
+display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;
+z-index:9999;padding:2.5rem 2rem;
 }
-.perm-overlay h2{font-size:1.2rem;margin-bottom:.5rem}
-.perm-overlay p{font-size:.75rem;color:#9ca3af;margin-bottom:1.5rem;max-width:18rem;line-height:1.5}
+.perm h2{font-size:1.5rem;font-weight:600;letter-spacing:.02em;margin-bottom:.6rem}
+.perm p{font-family:var(–fontb);font-size:.75rem;color:var(–g5);line-height:1.7;max-width:20rem;margin-bottom:2rem}
 .perm-btn{
-  background:#16a34a;color:#fff;border:none;border-radius:.7rem;
-  padding:.9rem 2.5rem;font-size:1rem;font-weight:700;cursor:pointer;
-  letter-spacing:.05em;
+background:var(–white);color:var(–black);border:none;
+font-family:var(–font);font-size:.8rem;font-weight:600;
+letter-spacing:.08em;text-transform:uppercase;padding:.8rem 2rem;cursor:pointer;
 }
-.perm-btn:active{background:#22c55e}
-.perm-skip{background:none;border:none;color:#4b5563;font-size:.65rem;cursor:pointer;margin-top:.8rem}
+.perm-btn:active{background:var(–g5)}
+.perm-skip{background:none;border:none;color:var(–g4);font-family:var(–fontb);font-size:.65rem;cursor:pointer;margin-top:1rem}
 
-.leaflet-container{background:#0a0a14!important}
+/* ── shell ── */
+.shell{width:100%;height:100%;display:flex;flex-direction:column}
+.hdr{
+display:flex;align-items:baseline;justify-content:space-between;
+padding:.55rem .8rem .45rem;border-bottom:1px solid var(–g2);flex-shrink:0;
+}
+.hdr-t{font-size:.6rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(–g4)}
+.hdr-s{font-family:var(–fontb);font-size:.55rem;font-weight:400;color:var(–g4)}
+.hdr-s.live{color:var(–white)}
+.hdr-s.live::before{
+content:’’;display:inline-block;width:.35rem;height:.35rem;border-radius:50%;
+background:var(–red);margin-right:.35rem;vertical-align:middle;
+animation:blink 1.4s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── cockpit ── */
+.cockpit{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.35fr 1fr}
+.panel{border-right:1px solid var(–g2)}
+.panel:last-child{border-right:none}
+
+/* LEFT: map / pace toggle */
+.panel-left{position:relative;overflow:hidden;cursor:pointer}
+.panel-label{
+position:absolute;top:.55rem;left:.6rem;z-index:20;
+font-size:.45rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(–g4);
+pointer-events:none;
+}
+.tap-hint{
+position:absolute;bottom:.55rem;left:0;right:0;z-index:20;
+text-align:center;font-size:.42rem;letter-spacing:.12em;text-transform:uppercase;
+color:var(–g3);pointer-events:none;font-family:var(–fontb);
+}
+
+/* map layer */
+#mapWrap{position:absolute;inset:0;z-index:1;transition:opacity .25s}
+#map{width:100%;height:100%}
+.map-msg{
+position:absolute;inset:0;display:flex;flex-direction:column;
+align-items:center;justify-content:center;gap:.5rem;z-index:2;pointer-events:none;
+}
+.map-msg-txt{font-family:var(–fontb);font-size:.55rem;color:var(–g3);text-align:center;line-height:1.6}
+
+/* pace layer */
+#paceWrap{
+position:absolute;inset:0;z-index:2;
+display:flex;flex-direction:column;
+opacity:0;pointer-events:none;transition:opacity .25s;
+}
+#paceWrap.active{opacity:1;pointer-events:auto}
+#mapWrap.hidden{opacity:0;pointer-events:none}
+#paceCanvas{width:100%;flex:1;display:block}
+
+/* pace picker overlay */
+.pace-picker-wrap{
+flex-shrink:0;border-top:1px solid var(–g2);
+display:flex;flex-direction:column;align-items:center;
+padding:.3rem .4rem .35rem;gap:.15rem;
+background:var(–black);
+}
+.pace-picker-lbl{font-size:.42rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(–g4)}
+.pace-picker-val{font-size:1rem;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.03em}
+
+/* Drum wheel */
+.drum-outer{
+position:relative;width:100%;height:3rem;overflow:hidden;
+border-top:1px solid var(–g3);border-bottom:1px solid var(–g3);
+}
+.drum-track{
+display:flex;flex-direction:column;
+position:absolute;left:0;right:0;top:0;
+will-change:transform;
+}
+.drum-item{
+height:3rem;display:flex;align-items:center;justify-content:center;
+font-size:.85rem;font-weight:500;font-variant-numeric:tabular-nums;
+color:var(–g4);flex-shrink:0;letter-spacing:.04em;
+transition:color .15s;
+}
+.drum-item.selected{color:var(–white);font-weight:700}
+/* fade top/bottom */
+.drum-outer::before,.drum-outer::after{
+content:’’;position:absolute;left:0;right:0;height:1rem;z-index:2;pointer-events:none;
+}
+.drum-outer::before{top:0;background:linear-gradient(to bottom,var(–black),transparent)}
+.drum-outer::after{bottom:0;background:linear-gradient(to top,var(–black),transparent)}
+
+/* CENTER */
+.panel-main{display:flex;flex-direction:column}
+.rate-block{
+flex:0 0 55%;display:flex;flex-direction:column;
+align-items:center;justify-content:center;
+padding:.5rem .4rem .3rem;border-bottom:1px solid var(–g2);
+}
+.rate-lbl{font-size:.45rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(–g4);margin-bottom:.3rem}
+.rate-num{
+font-size:min(7.5rem,23vw);font-weight:700;line-height:.88;
+letter-spacing:-.03em;font-variant-numeric:tabular-nums;
+color:var(–g3);transition:color .2s;
+}
+.rate-num.active{color:var(–white)}
+.rate-num.warn{color:var(–red)}
+.rate-unit{font-size:.5rem;font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:var(–g4);margin-top:.35rem}
+.sens-bar{
+width:60%;height:1px;background:var(–g2);margin-top:.4rem;
+visibility:hidden;position:relative;overflow:hidden;
+}
+.sens-bar.show{visibility:visible}
+.sens-fill{position:absolute;left:0;top:0;height:100%;width:0;background:var(–white);transition:width .07s}
+
+.split-block{
+flex:1;display:flex;flex-direction:column;
+align-items:center;justify-content:center;
+padding:.3rem .4rem;border-bottom:1px solid var(–g2);gap:.1rem;
+}
+.split-lbl{font-size:.45rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(–g4)}
+.split-num{font-size:min(2.6rem,8vw);font-weight:300;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:var(–white)}
+.split-num.dim{color:var(–g3)}
+
+.ctrl-block{padding:.5rem .6rem;display:flex;flex-direction:column;gap:.3rem}
+.sr-row{
+display:flex;align-items:center;gap:.4rem;
+font-size:.45rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(–g4);
+visibility:hidden;
+}
+.sr-row.show{visibility:visible}
+.sr-row input{flex:1;accent-color:var(–white);height:.7rem}
+.sr-val{width:1.2rem;text-align:right;font-variant-numeric:tabular-nums}
+.main-btn{
+width:100%;height:2.4rem;background:none;border:1px solid var(–g3);color:var(–white);
+font-family:var(–font);font-size:.7rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+cursor:pointer;transition:border-color .1s,background .1s;
+}
+.main-btn:active{background:var(–g2)}
+.main-btn.running{border-color:var(–red);color:var(–red)}
+.rst-btn{
+background:none;border:none;color:var(–g3);font-family:var(–fontb);
+font-size:.52rem;font-weight:400;letter-spacing:.06em;cursor:pointer;text-align:center;
+}
+.rst-btn:active{color:var(–g5)}
+
+/* RIGHT */
+.panel-stats{display:flex;flex-direction:column}
+.stats-hdr{
+padding:.55rem .65rem .4rem;border-bottom:1px solid var(–g2);
+font-size:.45rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(–g4);flex-shrink:0;
+}
+.stats-list{flex:1;display:flex;flex-direction:column;justify-content:space-around}
+.stat{
+padding:0 .65rem;border-bottom:1px solid var(–g2);
+display:flex;flex-direction:column;justify-content:center;flex:1;
+}
+.stat:last-child{border-bottom:none}
+.stat-val{
+font-size:min(1.45rem,4.2vw);font-weight:500;font-variant-numeric:tabular-nums;
+color:var(–white);line-height:1.15;letter-spacing:-.01em;
+}
+.stat-val .unit{font-size:.6em;font-weight:400;color:var(–g4)}
+.stat-lbl{font-family:var(–fontb);font-size:.45rem;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:var(–g4);margin-top:.05rem}
+
+.panel-right{position:relative;overflow:hidden;cursor:pointer}
+.leaflet-container{background:#000!important}
 .leaflet-control-attribution{display:none!important}
 </style>
+
 </head>
 <body>
 
 <div class="flash" id="flash"></div>
 
-<!-- Permission Overlay -->
-<div class="perm-overlay" id="permOverlay">
-  <h2>🚣 Schlagzahlmesser</h2>
-  <p>Die App benötigt Zugriff auf den <strong>Bewegungssensor</strong> (Schlagzählung) und <strong>GPS</strong> (Strecke &amp; Tempo).<br><br>Bitte erlaube beides im nächsten Schritt.</p>
+<div class="perm" id="permOverlay">
+  <h2>Schlagzahlmesser</h2>
+  <p>Die App benötigt Zugriff auf den Bewegungssensor zur Schlagzählung sowie GPS für Strecke und Tempo.</p>
   <button class="perm-btn" id="permBtn">Berechtigungen erteilen</button>
   <button class="perm-skip" id="permSkip">Überspringen</button>
 </div>
 
-<div class="hdr"><h1>🚣 Schlagzahlmesser</h1></div>
+<div class="shell">
+  <div class="hdr">
+    <span class="hdr-t">Schlagzahlmesser</span>
+    <span class="hdr-s" id="hdrStatus"></span>
+  </div>
 
-<div class="main">
-  <div class="rn c0" id="rate">0</div>
-  <div class="rl">Schläge / min</div>
-  <div class="bw" id="bw" style="visibility:hidden"><div class="bi" id="bf"></div></div>
+  <div class="cockpit">
+
+```
+<!-- LEFT: map / pace toggle -->
+<div class="panel panel-left" id="leftPanel">
+  <div class="panel-label" id="leftLabel">Route</div>
+  <div class="tap-hint" id="tapHint">antippen zum wechseln</div>
+
+  <!-- Map -->
+  <div id="mapWrap">
+    <div class="map-msg" id="mapMsg">
+      <div class="map-msg-txt">Karte erscheint<br>mit GPS-Signal</div>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <!-- Pace boat view -->
+  <div id="paceWrap">
+    <canvas id="paceCanvas"></canvas>
+    <div class="pace-picker-wrap">
+      <div class="pace-picker-lbl">Pace-Boot Split</div>
+      <div class="pace-picker-val" id="pacePickerVal">2:00.0</div>
+      <div class="drum-outer" id="drumOuter">
+        <div class="drum-track" id="drumTrack"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="stats">
-  <div class="st hl">
-    <div class="st-v" id="split">–:––</div>
-    <div class="st-l">/500m Split</div>
+<!-- CENTER -->
+<div class="panel panel-main">
+  <div class="rate-block">
+    <div class="rate-lbl">Schläge / min</div>
+    <div class="rate-num" id="rate">0</div>
+    <div class="sens-bar" id="sensBar"><div class="sens-fill" id="sensFill"></div></div>
+    <div class="rate-unit">S / MIN</div>
   </div>
-  <div class="st">
-    <div class="st-v" id="time">00:00</div>
-    <div class="st-l">Zeit</div>
+  <div class="split-block">
+    <div class="split-lbl">Split / 500 m</div>
+    <div class="split-num dim" id="split">–:––</div>
   </div>
-  <div class="st">
-    <div class="st-v"><span id="dist">0</span><span class="st-u" id="du"> m</span></div>
-    <div class="st-l">Distanz</div>
-  </div>
-  <div class="st">
-    <div class="st-v" id="avgR">0</div>
-    <div class="st-l">Ø Schlagzahl</div>
-  </div>
-  <div class="st">
-    <div class="st-v"><span id="dps">0.0</span><span class="st-u"> m</span></div>
-    <div class="st-l">m / Schlag</div>
-  </div>
-  <div class="st">
-    <div class="st-v"><span id="spd">0.0</span><span class="st-u"> km/h</span></div>
-    <div class="st-l">Tempo</div>
+  <div class="ctrl-block">
+    <div class="sr-row" id="srRow">
+      <span>Sens</span>
+      <input type="range" id="ss" min="1" max="10" step=".5" value="3">
+      <span class="sr-val" id="svl">3</span>
+    </div>
+    <button class="main-btn" id="btn">Start</button>
+    <button class="rst-btn" id="rst">↺ Zurücksetzen</button>
   </div>
 </div>
 
-<div class="map-wrap">
-  <div class="mm" id="mapMsg">📍 Karte erscheint mit GPS-Signal</div>
-  <div id="map"></div>
-</div>
-
-<div class="ctrl">
-  <div class="sr" id="sr" style="visibility:hidden">
-    <span>Empfindl.</span>
-    <input type="range" id="ss" min="1" max="10" step="0.5" value="3">
-    <span class="svl" id="svl">3</span>
+<!-- RIGHT: stats / force curve toggle -->
+<div class="panel panel-right" id="rightPanel">
+  <!-- Stats view -->
+  <div id="statsWrap" style="display:flex;flex-direction:column;height:100%">
+    <div class="stats-hdr" style="cursor:pointer">Statistik <span style="color:var(--g3);font-size:.4rem;letter-spacing:.05em">antippen</span></div>
+    <div class="stats-list">
+      <div class="stat"><div class="stat-val" id="time">00:00</div><div class="stat-lbl">Zeit</div></div>
+      <div class="stat"><div class="stat-val"><span id="dist">0</span><span class="unit" id="du"> m</span></div><div class="stat-lbl">Distanz</div></div>
+      <div class="stat"><div class="stat-val"><span id="avgSplit">–:––</span></div><div class="stat-lbl">Ø Split / 500 m</div></div>
+      <div class="stat"><div class="stat-val"><span id="avgR">0</span></div><div class="stat-lbl">Ø Schlagzahl</div></div>
+      <div class="stat"><div class="stat-val"><span id="dps">0.0</span><span class="unit"> m</span></div><div class="stat-lbl">Meter / Schlag</div></div>
+      <div class="stat"><div class="stat-val"><span id="spd">0.0</span><span class="unit"> km/h</span></div><div class="stat-lbl">Tempo</div></div>
+    </div>
   </div>
-  <button class="bm bg" id="btn">▶︎&ensp;START</button>
-  <div class="sx" id="stx">&nbsp;</div>
-  <button class="br" id="rst">↺ Zurücksetzen</button>
+  <!-- Force curve view -->
+  <div id="forceWrap" style="display:none;flex-direction:column;height:100%">
+    <div class="stats-hdr" style="cursor:pointer">Kraftkurve <span style="color:var(--g3);font-size:.4rem;letter-spacing:.05em">antippen</span></div>
+    <canvas id="forceCanvas" style="flex:1;width:100%;display:block"></canvas>
+  </div>
+</div>
+```
+
+  </div>
 </div>
 
 <script>
-/* ── State ──────────────────────────── */
-let app='idle',sRate=0,sCount=0,tDist=0,elapsed=0;
-let runStart=null,pauseAccum=0;
-let sens=3,smoothed=0,isAbove=false,lastStrokeT=0,recent=[];
-let sOk=false,sOn=false,gpsPermOk=false;
-let gpsId=null,lastGps=null,gpsGot=false;
-let tickId=null,decayId=null,wakeLock=null;
-let lastVis=0,curSpd=0;
-let gHist=[],tPts=[];
-let map=null,tLine=null,pMark=null,mapOk=false;
+/* ── State ── */
+let app='idle', sRate=0, sCount=0, tDist=0, elapsed=0;
+let runStart=null, pauseAccum=0;
+let sens=3, smoothed=0, isAbove=false, lastStrokeT=0, recent=[];
+let sOk=false, sOn=false, gpsPermOk=false;
+const recentStrokeTimes=[];
+let gpsId=null, lastGps=null, gpsGot=false;
+let tickId=null, decayId=null, wakeLock=null;
+let lastVis=0, curSpd=0;
+let gHist=[], tPts=[];
+let map=null, tLine=null, pMark=null, mapOk=false;
+let leftMode='map'; // 'map' | 'pace'
+let rightMode='stats'; // 'stats' | 'force'
+// Force curve: ring buffer of raw accel samples
+const FORCE_BUF=300;
+let forceBuf=new Float32Array(FORCE_BUF);
+let forceBufIdx=0;
+let forceRafId=null;
+let forceMax=1; // rolling max for autoscale
+let paceRafId=null;
+let paceSplitSec=120; // default 2:00 /500m → speed = 500/120 m/s
 
-/* ── DOM ────────────────────────────── */
+/* ── DOM ── */
 const $=id=>document.getElementById(id);
 const eR=$('rate'),eSp=$('split'),eT=$('time'),eD=$('dist'),eDu=$('du');
-const eA=$('avgR'),eDps=$('dps'),eSpd=$('spd');
-const eF=$('flash'),eBf=$('bf'),eBw=$('bw');
-const eBtn=$('btn'),eSt=$('stx'),eSr=$('sr'),eSvl=$('svl'),eMm=$('mapMsg');
-const ePerm=$('permOverlay'),ePermBtn=$('permBtn'),ePermSkip=$('permSkip');
+const eA=$('avgR'),eDps=$('dps'),eSpd=$('spd'),eAvgSp=$('avgSplit');
+const eF=$('flash'),eSFill=$('sensFill'),eSBar=$('sensBar'),eSrRow=$('srRow');
+const eBtn=$('btn'),eSvl=$('svl'),eMm=$('mapMsg'),eHdr=$('hdrStatus');
+const eLeftPanel=$('leftPanel'),eLeftLabel=$('leftLabel'),eTapHint=$('tapHint');
+const eMapWrap=$('mapWrap'),ePaceWrap=$('paceWrap');
+const eCanvas=$('paceCanvas');
+const ctx=eCanvas.getContext('2d');
 
 $('ss').addEventListener('input',e=>{sens=parseFloat(e.target.value);eSvl.textContent=e.target.value});
 document.addEventListener('dblclick',e=>e.preventDefault());
 
-/* ── Permission Overlay ─────────────── */
-ePermBtn.addEventListener('click', async ()=>{
-  // Request motion permission (iOS)
+/* ── Permissions ── */
+$('permBtn').addEventListener('click',async()=>{
   if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
-    try{
-      const p=await DeviceMotionEvent.requestPermission();
-      if(p==='granted')sOk=true;
-    }catch(e){console.warn('Motion permission error',e)}
-  }else if(window.DeviceMotionEvent){
-    sOk=true;
-  }
-
-  // Request GPS permission by doing a one-shot position request
+    try{const p=await DeviceMotionEvent.requestPermission();if(p==='granted')sOk=true}catch(e){}
+  }else if(window.DeviceMotionEvent){sOk=true}
   if(navigator.geolocation){
-    try{
-      await new Promise((res,rej)=>{
-        navigator.geolocation.getCurrentPosition(
-          pos=>{gpsPermOk=true;res(pos)},
-          err=>{console.warn('GPS error',err);rej(err)},
-          {enableHighAccuracy:true,timeout:10000}
-        );
-      });
-    }catch(e){}
+    try{await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(p=>{gpsPermOk=true;res(p)},e=>rej(e),{enableHighAccuracy:true,timeout:10000}))}catch(e){}
   }
+  $('permOverlay').style.display='none';updSt();
+});
+$('permSkip').addEventListener('click',()=>$('permOverlay').style.display='none');
 
-  ePerm.style.display='none';
-  updatePermStatus();
+/* ── Right panel toggle ── */
+const eRightPanel=$('rightPanel');
+const eStatsWrap=$('statsWrap');
+const eForceWrap=$('forceWrap');
+const eForceCanvas=$('forceCanvas');
+const fctx=eForceCanvas.getContext('2d');
+
+eRightPanel.addEventListener('click',()=>{
+  rightMode=rightMode==='stats'?'force':'stats';
+  if(rightMode==='force'){
+    eStatsWrap.style.display='none';
+    eForceWrap.style.display='flex';
+    startForceAnim();
+  }else{
+    eForceWrap.style.display='none';
+    eStatsWrap.style.display='flex';
+    stopForceAnim();
+  }
 });
 
-ePermSkip.addEventListener('click',()=>{
-  ePerm.style.display='none';
-});
-
-function updatePermStatus(){
-  let parts=[];
-  if(sOk)parts.push('Sensor ✓');
-  else parts.push('Sensor ✗');
-  if(gpsPermOk)parts.push('GPS ✓');
-  else parts.push('GPS ✗');
-  eSt.textContent=parts.join(' · ');
-  eSt.className='sx '+(sOk&&gpsPermOk?'ok':sOk||gpsPermOk?'ok':'er');
+function resizeForceCanvas(){
+  const r=eForceCanvas.getBoundingClientRect();
+  if(r.width===0||r.height===0)return;
+  eForceCanvas.width =Math.round(r.width *window.devicePixelRatio);
+  eForceCanvas.height=Math.round(r.height*window.devicePixelRatio);
+  fctx.setTransform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
 }
 
-/* ── Map ────────────────────────────── */
+function drawForce(){
+  const r=eForceCanvas.getBoundingClientRect();
+  const W=r.width, H=r.height;
+  if(W===0||H===0)return;
+  if(eForceCanvas.width!==Math.round(W*window.devicePixelRatio)||
+     eForceCanvas.height!==Math.round(H*window.devicePixelRatio)){resizeForceCanvas();}
+
+  fctx.clearRect(0,0,W,H);
+  fctx.fillStyle='#000';
+  fctx.fillRect(0,0,W,H);
+
+  // Collect samples in chronological order
+  const n=FORCE_BUF;
+  const total=forceBufIdx;
+  const samples=[];
+  for(let i=0;i<n;i++){
+    const idx=(total-n+i+n)%n;
+    samples.push(forceBuf[idx]);
+  }
+
+  // Rolling max for autoscale (smooth)
+  const curMax=Math.max(...samples,0.5);
+  forceMax=forceMax*0.96+curMax*0.04;
+  const scale=forceMax<0.1?1:forceMax;
+
+  // Horizontal grid lines (4 divisions)
+  fctx.strokeStyle='rgba(255,255,255,0.05)';
+  fctx.lineWidth=1;
+  for(let g=1;g<4;g++){
+    const y=H*(g/4);
+    fctx.beginPath();fctx.moveTo(0,y);fctx.lineTo(W,y);fctx.stroke();
+  }
+
+  // Stroke marker lines – vertical lines at each detected stroke
+  // We mark the last few strokes using lastStrokeT
+  // (stored in recentStrokes array)
+  if(recentStrokeTimes.length>0){
+    const nowMs=Date.now();
+    // each sample is ~16ms apart (60Hz)
+    const msPerSample=16;
+    fctx.strokeStyle='rgba(255,255,255,0.15)';
+    fctx.lineWidth=1;
+    recentStrokeTimes.forEach(t=>{
+      const msSince=nowMs-t;
+      const samplesAgo=msSince/msPerSample;
+      const x=W-(samplesAgo/n)*W;
+      if(x>0&&x<W){
+        fctx.beginPath();fctx.moveTo(x,0);fctx.lineTo(x,H);fctx.stroke();
+      }
+    });
+  }
+
+  // Force curve
+  fctx.beginPath();
+  for(let i=0;i<n;i++){
+    const x=(i/(n-1))*W;
+    const y=H-(samples[i]/scale)*(H*0.88)-H*0.06;
+    i===0?fctx.moveTo(x,y):fctx.lineTo(x,y);
+  }
+  fctx.strokeStyle='rgba(255,255,255,0.9)';
+  fctx.lineWidth=1.2;
+  fctx.lineJoin='round';
+  fctx.stroke();
+
+  // Fill under curve
+  fctx.lineTo(W,H);fctx.lineTo(0,H);fctx.closePath();
+  fctx.fillStyle='rgba(255,255,255,0.04)';
+  fctx.fill();
+
+  // "No sensor" hint
+  if(!sOk){
+    fctx.font=`400 ${Math.max(8,Math.round(W*0.08))}px 'Barlow',sans-serif`;
+    fctx.fillStyle='rgba(255,255,255,0.2)';
+    fctx.textAlign='center';fctx.textBaseline='middle';
+    fctx.fillText('Sensor nicht aktiv',W/2,H/2);
+  }
+}
+
+function startForceAnim(){
+  if(forceRafId)return;
+  resizeForceCanvas();
+  const loop=()=>{drawForce();forceRafId=requestAnimationFrame(loop);};
+  forceRafId=requestAnimationFrame(loop);
+}
+function stopForceAnim(){
+  if(forceRafId){cancelAnimationFrame(forceRafId);forceRafId=null;}
+}
+
+/* ── Left panel toggle ── */
+eLeftPanel.addEventListener('click',e=>{
+  // Don't toggle when interacting with drum
+  if(e.target.closest('#drumOuter'))return;
+  leftMode=leftMode==='map'?'pace':'map';
+  applyLeftMode();
+});
+
+function applyLeftMode(){
+  if(leftMode==='pace'){
+    eMapWrap.classList.add('hidden');
+    ePaceWrap.classList.add('active');
+    eLeftLabel.textContent='Pace-Boot';
+    startPaceAnim();
+  }else{
+    eMapWrap.classList.remove('hidden');
+    ePaceWrap.classList.remove('active');
+    eLeftLabel.textContent='Route';
+    stopPaceAnim();
+  }
+}
+
+/* ── Drum wheel picker ── */
+// Generate splits from 1:20 to 4:00 in 2.5s steps
+const DRUM_ITEMS=[];
+for(let sec=80;sec<=240;sec+=2.5){
+  const m=Math.floor(sec/60),s=sec%60;
+  DRUM_ITEMS.push({sec,label:`${m}:${String(Math.floor(s)).padStart(2,'0')}.${Math.round((s%1)*10)}`});
+}
+
+const eDrumTrack=$('drumTrack');
+const eDrumOuter=$('drumOuter');
+const ePickerVal=$('pacePickerVal');
+const ITEM_H=48; // matches 3rem at default
+let drumIdx=DRUM_ITEMS.findIndex(d=>d.sec===paceSplitSec)||16;
+let drumY=0, drumTargetY=0, drumDragging=false;
+let drumStartY=0, drumStartOffset=0, drumVel=0, drumLastY=0, drumLastT=0;
+let drumAnimId=null;
+
+function buildDrum(){
+  eDrumTrack.innerHTML='';
+  DRUM_ITEMS.forEach((it,i)=>{
+    const div=document.createElement('div');
+    div.className='drum-item';
+    div.textContent=it.label;
+    eDrumTrack.appendChild(div);
+  });
+  drumIdx=DRUM_ITEMS.findIndex(d=>d.sec>=paceSplitSec)||16;
+  drumY=drumTargetY=-drumIdx*ITEM_H;
+  applyDrumY(drumY);
+  highlightDrum();
+}
+
+function applyDrumY(y){
+  eDrumTrack.style.transform=`translateY(${y+(ITEM_H/2)}px)`;
+}
+
+function highlightDrum(){
+  const idx=Math.round(-drumY/ITEM_H);
+  Array.from(eDrumTrack.children).forEach((el,i)=>el.classList.toggle('selected',i===idx));
+  const clamped=Math.max(0,Math.min(DRUM_ITEMS.length-1,idx));
+  paceSplitSec=DRUM_ITEMS[clamped].sec;
+  ePickerVal.textContent=DRUM_ITEMS[clamped].label;
+  drumIdx=clamped;
+}
+
+function snapDrum(){
+  const idx=Math.round(-drumY/ITEM_H);
+  const clamped=Math.max(0,Math.min(DRUM_ITEMS.length-1,idx));
+  drumTargetY=-clamped*ITEM_H;
+  animSnap();
+}
+
+function animSnap(){
+  cancelAnimationFrame(drumAnimId);
+  const step=()=>{
+    drumY+=(drumTargetY-drumY)*.18;
+    if(Math.abs(drumTargetY-drumY)<.3){drumY=drumTargetY;applyDrumY(drumY);highlightDrum();return;}
+    applyDrumY(drumY);highlightDrum();
+    drumAnimId=requestAnimationFrame(step);
+  };
+  drumAnimId=requestAnimationFrame(step);
+}
+
+// Touch/pointer events for drum
+function drumPointerStart(e){
+  e.stopPropagation();
+  cancelAnimationFrame(drumAnimId);
+  drumDragging=true;
+  drumStartY=e.touches?e.touches[0].clientY:e.clientY;
+  drumStartOffset=drumY;
+  drumVel=0;drumLastY=drumStartY;drumLastT=Date.now();
+}
+function drumPointerMove(e){
+  if(!drumDragging)return;
+  e.stopPropagation();e.preventDefault();
+  const cy=e.touches?e.touches[0].clientY:e.clientY;
+  const now=Date.now();
+  drumVel=(cy-drumLastY)/(now-drumLastT+1)*16;
+  drumLastY=cy;drumLastT=now;
+  drumY=drumStartOffset+(cy-drumStartY);
+  applyDrumY(drumY);highlightDrum();
+}
+function drumPointerEnd(e){
+  if(!drumDragging)return;
+  drumDragging=false;
+  // Apply inertia
+  let vel=drumVel;
+  const inertia=()=>{
+    vel*=.88;drumY+=vel;
+    applyDrumY(drumY);highlightDrum();
+    if(Math.abs(vel)>0.5){drumAnimId=requestAnimationFrame(inertia);}
+    else{snapDrum();}
+  };
+  if(Math.abs(vel)>1)requestAnimationFrame(inertia);
+  else snapDrum();
+}
+
+eDrumOuter.addEventListener('touchstart',drumPointerStart,{passive:true});
+eDrumOuter.addEventListener('touchmove',drumPointerMove,{passive:false});
+eDrumOuter.addEventListener('touchend',drumPointerEnd);
+eDrumOuter.addEventListener('mousedown',drumPointerStart);
+window.addEventListener('mousemove',drumPointerMove);
+window.addEventListener('mouseup',drumPointerEnd);
+
+buildDrum();
+
+/* ── Pace boat canvas animation ── */
+// Race: 2000m regatta lane view from above, schematic
+// myBoat position based on tDist, paceBoat based on elapsed + paceSplitSec
+let paceBoatDist=0;
+let myBoatDist=0; // same as tDist
+
+function startPaceAnim(){
+  if(paceRafId)return;
+  resizePaceCanvas();
+  const draw=()=>{
+    drawPace();
+    paceRafId=requestAnimationFrame(draw);
+  };
+  paceRafId=requestAnimationFrame(draw);
+}
+function stopPaceAnim(){
+  if(paceRafId){cancelAnimationFrame(paceRafId);paceRafId=null;}
+}
+
+function resizePaceCanvas(){
+  const rect=eCanvas.getBoundingClientRect();
+  if(rect.width===0||rect.height===0)return;
+  eCanvas.width =Math.round(rect.width *window.devicePixelRatio);
+  eCanvas.height=Math.round(rect.height*window.devicePixelRatio);
+  // reset transform each time
+  ctx.setTransform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
+}
+
+const RACE_M=2000;
+
+function drawPace(){
+  const rect=eCanvas.getBoundingClientRect();
+  const W=rect.width, H=rect.height;
+  if(W===0||H===0)return;
+
+  // Re-sync canvas resolution if panel size changed
+  if(eCanvas.width!==Math.round(W*window.devicePixelRatio)||
+     eCanvas.height!==Math.round(H*window.devicePixelRatio)){
+    resizePaceCanvas();
+  }
+
+  ctx.clearRect(0,0,W,H);
+
+  // Update positions
+  paceBoatDist=app==='running'?(elapsed*(500/paceSplitSec)):paceBoatDist;
+  myBoatDist=tDist;
+
+  // ── Layout: vertical race, bug points UP (y=0), stern at bottom (y=H)
+  // Two lanes side by side, race runs bottom→top
+  // Distance 0 = bottom, RACE_M = top
+  const viewM   = 350;
+  const leadDist= Math.max(paceBoatDist, myBoatDist, 1);
+  const camMid  = leadDist > viewM/2 ? leadDist - viewM*0.28 : viewM/2;
+  const camBot  = camMid - viewM/2;
+
+  // distance → y  (0m = bottom, RACE_M = top)
+  const toY = d => H - ((d - camBot) / viewM) * H;
+
+  // Two lanes side by side
+  const laneW  = W * 0.36;
+  const lane1X = W * 0.25; // pace lane center
+  const lane2X = W * 0.75; // my lane center
+
+  // ── Water ──
+  ctx.fillStyle='#030608';
+  ctx.fillRect(0,0,W,H);
+
+  // Subtle vertical water lines
+  ctx.strokeStyle='rgba(255,255,255,0.025)';
+  ctx.lineWidth=1;
+  for(let x=0;x<W;x+=10){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+
+  // Lane fills
+  ctx.fillStyle='rgba(255,255,255,0.018)';
+  ctx.fillRect(lane1X-laneW/2,0,laneW,H);
+  ctx.fillRect(lane2X-laneW/2,0,laneW,H);
+
+  // Lane boundary lines (vertical dashed)
+  function vLine(x){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,255,255,0.1)';
+    ctx.lineWidth=1;ctx.setLineDash([4,8]);
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+  vLine(lane1X-laneW/2); vLine(lane1X+laneW/2);
+  vLine(lane2X-laneW/2); vLine(lane2X+laneW/2);
+
+  // Lane labels at top
+  const lfs=Math.max(7,Math.round(W*0.055));
+  ctx.save();
+  ctx.font=`500 ${lfs}px 'Barlow Condensed',sans-serif`;
+  ctx.fillStyle='rgba(255,255,255,0.18)';
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.fillText('PACE', lane1X, 6);
+  ctx.fillText('ICH',  lane2X, 6);
+  ctx.restore();
+
+  // Distance markers (horizontal dashed lines)
+  const markerStep=100;
+  for(let m=0;m<=RACE_M;m+=markerStep){
+    const y=toY(m);
+    if(y<-10||y>H+10)continue;
+    ctx.save();
+    ctx.strokeStyle='rgba(255,255,255,0.06)';
+    ctx.lineWidth=1;ctx.setLineDash([2,5]);
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+    ctx.setLineDash([]);
+    if(m>0&&m<RACE_M){
+      ctx.font=`400 ${Math.max(7,Math.round(W*0.048))}px 'Barlow',sans-serif`;
+      ctx.fillStyle='rgba(255,255,255,0.18)';
+      ctx.textAlign='left'; ctx.textBaseline='middle';
+      ctx.fillText(m+'m', 3, y);
+    }
+    ctx.restore();
+  }
+
+  // Start line
+  const startY=toY(0);
+  if(startY>-2&&startY<H+2){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,255,255,0.28)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(0,startY);ctx.lineTo(W,startY);ctx.stroke();
+    ctx.font=`500 ${Math.max(7,Math.round(W*0.052))}px 'Barlow Condensed',sans-serif`;
+    ctx.fillStyle='rgba(255,255,255,0.28)';ctx.textAlign='right';ctx.textBaseline='bottom';
+    ctx.fillText('START',W-3,startY-2);
+    ctx.restore();
+  }
+
+  // Finish line
+  const finY=toY(RACE_M);
+  if(finY>-2&&finY<H+2){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,255,255,0.35)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(0,finY);ctx.lineTo(W,finY);ctx.stroke();
+    ctx.font=`500 ${Math.max(7,Math.round(W*0.052))}px 'Barlow Condensed',sans-serif`;
+    ctx.fillStyle='rgba(255,255,255,0.35)';ctx.textAlign='right';ctx.textBaseline='top';
+    ctx.fillText('ZIEL',W-3,finY+2);
+    ctx.restore();
+  }
+
+  // ── Draw boat: vertical needle, bow=top ──
+  function drawBoat(distM, cx, col){
+    const y   = toY(distM);
+    // hull proportions relative to panel height
+    const bL  = Math.min(H*0.18, laneW*0.55);  // hull length (vertical)
+    const bW  = bL * 0.13;                       // beam (very narrow)
+    const bowY   = y - bL*0.5;   // top
+    const sternY = y + bL*0.5;   // bottom
+
+    // Wake – two thin lines spreading downward from stern
+    const wAlpha = Math.min(0.3, distM/150);
+    ctx.save();
+    ctx.strokeStyle = col.replace(/[\d.]+\)$/, `${wAlpha})`);
+    ctx.lineWidth=0.8; ctx.setLineDash([2,7]);
+    const wakeLen = Math.min(bL*1.8, distM*0.015+6);
+    ctx.beginPath(); ctx.moveTo(cx-bW*0.2, sternY); ctx.lineTo(cx-bW*1.8, sternY+wakeLen); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+bW*0.2, sternY); ctx.lineTo(cx+bW*1.8, sternY+wakeLen); ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
+
+    // Hull – vertical needle bezier
+    ctx.save();
+    ctx.beginPath();
+    // left edge: stern→bow
+    ctx.moveTo(cx, bowY);
+    ctx.bezierCurveTo(
+      cx-bW*0.9, bowY  +bL*0.2,
+      cx-bW*0.75, sternY-bL*0.15,
+      cx, sternY
+    );
+    // right edge: stern→bow
+    ctx.bezierCurveTo(
+      cx+bW*0.75, sternY-bL*0.15,
+      cx+bW*0.9,  bowY  +bL*0.2,
+      cx, bowY
+    );
+    ctx.closePath();
+    ctx.fillStyle   = col.replace(/[\d.]+\)$/, '0.12)');
+    ctx.strokeStyle = col;
+    ctx.lineWidth   = Math.max(1, bW*0.4);
+    ctx.lineJoin    = 'round';
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  drawBoat(Math.min(paceBoatDist,RACE_M), lane1X, 'rgba(255,50,50,1)');
+  drawBoat(Math.min(myBoatDist,  RACE_M), lane2X, 'rgba(255,255,255,1)');
+
+  // Gap readout in the centre strip between lanes
+  const gap    = paceBoatDist - myBoatDist;
+  const gapAbs = Math.abs(gap);
+  const gapStr = gapAbs<1 ? '––' : (gap>0?'+':'–')+gapAbs.toFixed(0)+'m';
+  const gapCol = gap>3 ? 'rgba(255,80,80,0.9)' : gap<-3 ? 'rgba(160,255,160,0.9)' : 'rgba(255,255,255,0.45)';
+  const gapFS  = Math.max(9, Math.round(W*0.1));
+  ctx.save();
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font=`700 ${gapFS}px 'Barlow Condensed',sans-serif`;
+  ctx.fillStyle=gapCol;
+  ctx.fillText(gapStr, W/2, H/2);
+  ctx.font=`400 ${Math.max(7,Math.round(W*0.06))}px 'Barlow',sans-serif`;
+  ctx.fillStyle='rgba(255,255,255,0.2)';
+  ctx.fillText('Δ', W/2, H/2 + gapFS*0.9);
+  ctx.restore();
+}
+
+window.addEventListener('resize',()=>{
+  if(leftMode==='pace')resizePaceCanvas();
+});
+
+/* ── Map ── */
 function initMap(lat,lon){
   if(mapOk)return;mapOk=true;eMm.style.display='none';
   map=L.map('map',{zoomControl:false,attributionControl:false,dragging:false,
-    scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false,boxZoom:false,
-    keyboard:false,tap:false}).setView([lat,lon],16);
+    scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false,boxZoom:false,keyboard:false,tap:false})
+    .setView([lat,lon],16);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
-  tLine=L.polyline([],{color:'#4ade80',weight:3,opacity:.8}).addTo(map);
-  pMark=L.circleMarker([lat,lon],{radius:6,color:'#fff',fillColor:'#22c55e',fillOpacity:1,weight:2}).addTo(map);
+  tLine=L.polyline([],{color:'#ffffff',weight:2,opacity:.7}).addTo(map);
+  pMark=L.circleMarker([lat,lon],{radius:4,color:'#fff',fillColor:'#fff',fillOpacity:1,weight:0}).addTo(map);
   setTimeout(()=>map.invalidateSize(),200);
 }
 function updMap(lat,lon){
   if(!mapOk)initMap(lat,lon);
   tLine.setLatLngs(tPts);pMark.setLatLng([lat,lon]);
-  if(tPts.length>2){map.fitBounds(tLine.getBounds().pad(.15),{animate:false,maxZoom:17})}
-  else{map.setView([lat,lon],16,{animate:false})}
+  if(tPts.length>2)map.fitBounds(tLine.getBounds().pad(.2),{animate:false,maxZoom:17});
+  else map.setView([lat,lon],16,{animate:false});
 }
 
-/* ── UI ─────────────────────────────── */
+/* ── Format ── */
 function fmtT(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 function fmtSplit(v){
   if(v<.3)return'–:––';
@@ -255,52 +841,59 @@ function fmtSplit(v){
   const m=Math.floor(t/60),s=t%60;
   return m+':'+String(Math.floor(s)).padStart(2,'0')+'.'+Math.floor((s%1)*10);
 }
+
+/* ── UI ── */
 function ui(){
   eR.textContent=sRate;
-  eR.className='rn '+(sRate===0?'c0':sRate<22?'c1':sRate<32?'c2':'c3');
+  eR.className='rate-num'+(sRate===0?'':sRate<32?' active':' warn');
+  const ss=fmtSplit(curSpd);eSp.textContent=ss;eSp.className='split-num'+(ss==='–:––'?' dim':'');
   const mins=elapsed/60;
   eA.textContent=(mins>0&&sCount>0)?Math.round(sCount/mins):0;
   eT.textContent=fmtT(elapsed);
-  if(tDist>=1000){eD.textContent=(tDist/1000).toFixed(2);eDu.textContent=' km'}
-  else{eD.textContent=Math.round(tDist);eDu.textContent=' m'}
+  if(tDist>=1000){eD.textContent=(tDist/1000).toFixed(2);eDu.textContent=' km';}
+  else{eD.textContent=Math.round(tDist);eDu.textContent=' m';}
   eDps.textContent=sCount>0?(tDist/sCount).toFixed(1):'0.0';
-  eSp.textContent=fmtSplit(curSpd);
   eSpd.textContent=(curSpd*3.6).toFixed(1);
+  eAvgSp.textContent=(tDist>10&&elapsed>5)?fmtSplit(tDist/elapsed):'–:––';
 }
 
-/* ── Stroke ─────────────────────────── */
+/* ── Stroke ── */
 function stroke(now){
   if(app!=='running')return;
   if(now-lastStrokeT<1200)return;
   lastStrokeT=now;sCount++;
   recent.push(now);if(recent.length>8)recent.shift();
-  eF.classList.add('on');setTimeout(()=>eF.classList.remove('on'),100);
+  recentStrokeTimes.push(now);if(recentStrokeTimes.length>6)recentStrokeTimes.shift();
+  eF.classList.add('on');setTimeout(()=>eF.classList.remove('on'),80);
   if(recent.length>=2){
     let s=0;for(let i=1;i<recent.length;i++)s+=recent[i]-recent[i-1];
     sRate=Math.min(Math.round(60000/(s/(recent.length-1))),60);
   }
-  clearTimeout(decayId);decayId=setTimeout(()=>{sRate=0;ui()},5000);
+  clearTimeout(decayId);decayId=setTimeout(()=>{sRate=0;ui();},5000);
   ui();
 }
 
-/* ── Accel ──────────────────────────── */
+/* ── Accel ── */
 function onMot(e){
   const a=e.acceleration||e.accelerationIncludingGravity;if(!a)return;
   let mag=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2);
   if(!e.acceleration)mag=Math.abs(mag-9.81);
   smoothed=.3*mag+.7*smoothed;
+  // record raw mag for force curve (unsmoothed feels more like a real force curve)
+  forceBuf[forceBufIdx%FORCE_BUF]=mag;
+  forceBufIdx++;
   const now=Date.now();
-  if(now-lastVis>80){lastVis=now;eBf.style.width=Math.min(100,(smoothed/(sens*2))*100)+'%'}
-  if(!isAbove&&smoothed>sens){isAbove=true;stroke(now)}
-  else if(isAbove&&smoothed<sens*.4){isAbove=false}
+  if(now-lastVis>80){lastVis=now;eSFill.style.width=Math.min(100,(smoothed/(sens*2))*100)+'%';}
+  if(!isAbove&&smoothed>sens){isAbove=true;stroke(now);}
+  else if(isAbove&&smoothed<sens*.4){isAbove=false;}
 }
 function sensStart(){
   if(sOn||!sOk)return;
   window.addEventListener('devicemotion',onMot);
-  sOn=true;eBw.style.visibility='visible';eSr.style.visibility='visible';
+  sOn=true;eSBar.classList.add('show');eSrRow.classList.add('show');
 }
 
-/* ── GPS ────────────────────────────── */
+/* ── GPS ── */
 function hav(a1,o1,a2,o2){
   const R=6371000,r=x=>x*Math.PI/180,dA=r(a2-a1),dO=r(o2-o1);
   const h=Math.sin(dA/2)**2+Math.cos(r(a1))*Math.cos(r(a2))*Math.sin(dO/2)**2;
@@ -310,92 +903,75 @@ function onPos(p){
   if(app!=='running')return;
   const{latitude:lat,longitude:lon,accuracy:acc,speed:gs}=p.coords;
   if(acc>30)return;
-  if(lastGps){
-    const d=hav(lastGps.lat,lastGps.lon,lat,lon);
-    if(d>1.5&&d<100)tDist+=d;
-  }
+  if(lastGps){const d=hav(lastGps.lat,lastGps.lon,lat,lon);if(d>1.5&&d<100)tDist+=d;}
   lastGps={lat,lon};tPts.push([lat,lon]);updMap(lat,lon);
   const now=Date.now();
   gHist.push({t:now,d:tDist});
   while(gHist.length>1&&now-gHist[0].t>12000)gHist.shift();
-  if(gHist.length>=2){
-    const f=gHist[0],l=gHist[gHist.length-1],dt=(l.t-f.t)/1000;
-    if(dt>2)curSpd=Math.max(0,(l.d-f.d)/dt);
-  }
-  if(gs!=null&&gs>.3){curSpd=curSpd*.6+gs*.4}
-  if(!gpsGot){gpsGot=true;updSt()}
+  if(gHist.length>=2){const f=gHist[0],l=gHist[gHist.length-1],dt=(l.t-f.t)/1000;if(dt>2)curSpd=Math.max(0,(l.d-f.d)/dt);}
+  if(gs!=null&&gs>.3)curSpd=curSpd*.6+gs*.4;
+  if(!gpsGot){gpsGot=true;updSt();}
   ui();
 }
-function gpsOn(){
-  if(!navigator.geolocation||gpsId!==null)return;
-  gpsId=navigator.geolocation.watchPosition(onPos,()=>{},{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
-}
-function gpsOff(){if(gpsId!==null){navigator.geolocation.clearWatch(gpsId);gpsId=null}lastGps=null}
+function gpsOn(){if(!navigator.geolocation||gpsId!==null)return;gpsId=navigator.geolocation.watchPosition(onPos,()=>{},{enableHighAccuracy:true,maximumAge:2000,timeout:10000});}
+function gpsOff(){if(gpsId!==null){navigator.geolocation.clearWatch(gpsId);gpsId=null;}lastGps=null;}
 
-/* ── Wake Lock ──────────────────────── */
-async function wlOn(){try{if('wakeLock'in navigator)wakeLock=await navigator.wakeLock.request('screen')}catch{}}
-function wlOff(){if(wakeLock){wakeLock.release();wakeLock=null}}
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&app==='running')wlOn()});
+/* ── Wake lock ── */
+async function wlOn(){try{if('wakeLock'in navigator)wakeLock=await navigator.wakeLock.request('screen');}catch{}}
+function wlOff(){if(wakeLock){wakeLock.release();wakeLock=null;}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&app==='running')wlOn();});
 
-/* ── Timer ──────────────────────────── */
-function tickOn(){
-  if(tickId)return;
-  tickId=setInterval(()=>{if(app==='running'&&runStart){elapsed=pauseAccum+Math.floor((Date.now()-runStart)/1000);ui()}},1000);
-}
-function tickOff(){clearInterval(tickId);tickId=null}
+/* ── Timer ── */
+function tickOn(){if(tickId)return;tickId=setInterval(()=>{if(app==='running'&&runStart){elapsed=pauseAccum+Math.floor((Date.now()-runStart)/1000);ui();}},1000);}
+function tickOff(){clearInterval(tickId);tickId=null;}
 
-/* ── Status ─────────────────────────── */
+/* ── Status ── */
 function updSt(){
   if(app==='running'){
-    const g=gpsGot?'GPS ✓':'GPS …';
-    const s=sOk?'Sensor ✓':'Sensor ✗';
-    eSt.innerHTML='<span class="pulse">●</span> Aufzeichnung · '+s+' · '+g;eSt.className='sx ok';
+    eHdr.textContent='Aufzeichnung · Sensor'+(gpsGot?' · GPS':'');
+    eHdr.className='hdr-s live';
   }else if(app==='paused'){
-    eSt.textContent='⏸ Pausiert';eSt.className='sx';
-  }else{eSt.innerHTML='&nbsp;';eSt.className='sx'}
+    eHdr.textContent='Pausiert';eHdr.className='hdr-s';
+  }else{
+    const p=[];if(sOk)p.push('Sensor');if(gpsPermOk)p.push('GPS');
+    eHdr.textContent=p.join(' · ');eHdr.className='hdr-s';
+  }
 }
 
-/* ── Main Button (click for permission compat) ── */
-eBtn.addEventListener('click', async ()=>{
+/* ── Main button ── */
+eBtn.addEventListener('click',async()=>{
   if(app==='idle'||app==='paused'){
-    // If sensor not yet permitted, try again from this click gesture
     if(!sOk){
       if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
-        try{
-          const p=await DeviceMotionEvent.requestPermission();
-          if(p==='granted')sOk=true;
-        }catch(e){}
-      }else if(window.DeviceMotionEvent){
-        sOk=true;
-      }
+        try{const p=await DeviceMotionEvent.requestPermission();if(p==='granted')sOk=true;}catch(e){}
+      }else if(window.DeviceMotionEvent){sOk=true;}
     }
-
     if(sOk)sensStart();
-
-    if(app==='idle'){runStart=Date.now();pauseAccum=0}
-    else{pauseAccum=elapsed;runStart=Date.now()}
+    if(app==='idle'){runStart=Date.now();pauseAccum=0;}
+    else{pauseAccum=elapsed;runStart=Date.now();}
     app='running';gpsOn();tickOn();wlOn();
-    eBtn.textContent='⏸  STOP';eBtn.className='bm bs';updSt();
+    eBtn.textContent='Stop';eBtn.className='main-btn running';updSt();
   }else{
     app='paused';elapsed=pauseAccum+Math.floor((Date.now()-runStart)/1000);
     gpsOff();tickOff();wlOff();
-    eBtn.textContent='▶︎  WEITER';eBtn.className='bm bg';updSt();ui();
+    eBtn.textContent='Weiter';eBtn.className='main-btn';updSt();ui();
   }
 });
 
-/* ── Reset ──────────────────────────── */
+/* ── Reset ── */
 $('rst').addEventListener('click',()=>{
-  app='idle';sRate=0;sCount=0;tDist=0;elapsed=0;curSpd=0;
+  app='idle';sRate=0;sCount=0;tDist=0;elapsed=0;curSpd=0;paceBoatDist=0;
   runStart=null;pauseAccum=0;
   smoothed=0;isAbove=false;lastStrokeT=0;recent=[];
   lastGps=null;gpsGot=false;gHist=[];tPts=[];
   gpsOff();tickOff();wlOff();clearTimeout(decayId);
   if(tLine)tLine.setLatLngs([]);
-  eBtn.textContent='▶︎  START';eBtn.className='bm bg';
-  eBf.style.width='0';updSt();ui();
+  eBtn.textContent='Start';eBtn.className='main-btn';
+  eSFill.style.width='0';updSt();ui();
 });
 
 ui();
 </script>
+
 </body>
 </html>
