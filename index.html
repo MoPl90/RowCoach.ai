@@ -9,8 +9,8 @@
 <title>Schlagzahl</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css"/>
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"/>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WPvE=" crossorigin="anonymous"></script>
 <style>
 :root {
   --black:  #000000;
@@ -39,183 +39,169 @@ html,body{
 
 /* ── perm overlay ── */
 .perm{
-position:fixed;inset:0;background:var(–black);
-display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;
-z-index:9999;padding:2.5rem 2rem;
+  position:fixed;inset:0;background:var(--black);
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;
+  z-index:9999;padding:2.5rem 2rem;
 }
 .perm h2{font-size:1.5rem;font-weight:600;letter-spacing:.02em;margin-bottom:.6rem}
-.perm p{font-family:var(–fontb);font-size:.75rem;color:var(–g5);line-height:1.7;max-width:20rem;margin-bottom:2rem}
+.perm p{font-family:var(--fontb);font-size:.75rem;color:var(--g5);line-height:1.7;max-width:20rem;margin-bottom:2rem}
 .perm-btn{
-background:var(–white);color:var(–black);border:none;
-font-family:var(–font);font-size:.8rem;font-weight:600;
-letter-spacing:.08em;text-transform:uppercase;padding:.8rem 2rem;cursor:pointer;
+  background:var(--white);color:var(--black);border:none;
+  font-family:var(--font);font-size:.8rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:.8rem 2rem;cursor:pointer;
 }
-.perm-btn:active{background:var(–g5)}
-.perm-skip{background:none;border:none;color:var(–g4);font-family:var(–fontb);font-size:.65rem;cursor:pointer;margin-top:1rem}
+.perm-btn:active{background:var(--g5)}
+.perm-skip{background:none;border:none;color:var(--g4);font-family:var(--fontb);font-size:.65rem;cursor:pointer;margin-top:1rem}
 
 /* ── shell ── */
 .shell{width:100%;height:100%;display:flex;flex-direction:column}
 .hdr{
-display:flex;align-items:baseline;justify-content:space-between;
-padding:.55rem .8rem .45rem;border-bottom:1px solid var(–g2);flex-shrink:0;
+  display:flex;align-items:baseline;justify-content:space-between;
+  padding:.55rem .8rem .45rem;border-bottom:1px solid var(--g2);flex-shrink:0;
 }
-.hdr-t{font-size:.6rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(–g4)}
-.hdr-s{font-family:var(–fontb);font-size:.55rem;font-weight:400;color:var(–g4)}
-.hdr-s.live{color:var(–white)}
+.hdr-t{font-size:.6rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--g4)}
+.hdr-s{font-family:var(--fontb);font-size:.55rem;font-weight:400;color:var(--g4)}
+.hdr-s.live{color:var(--white)}
 .hdr-s.live::before{
-content:’’;display:inline-block;width:.35rem;height:.35rem;border-radius:50%;
-background:var(–red);margin-right:.35rem;vertical-align:middle;
-animation:blink 1.4s ease-in-out infinite;
+  content:'';display:inline-block;width:.35rem;height:.35rem;border-radius:50%;
+  background:var(--red);margin-right:.35rem;vertical-align:middle;
+  animation:blink 1.4s ease-in-out infinite;
 }
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
-/* ── cockpit ── */
+/* ── cockpit (landscape) ── */
 .cockpit{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.35fr 1fr}
-.panel{border-right:1px solid var(–g2)}
+.panel{border-right:1px solid var(--g2)}
 .panel:last-child{border-right:none}
 
-/* LEFT: map / pace toggle */
-.panel-left{position:relative;overflow:hidden;cursor:pointer}
-.panel-label{
-position:absolute;top:.55rem;left:.6rem;z-index:20;
-font-size:.45rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(–g4);
-pointer-events:none;
-}
-.tap-hint{
-position:absolute;bottom:.55rem;left:0;right:0;z-index:20;
-text-align:center;font-size:.42rem;letter-spacing:.12em;text-transform:uppercase;
-color:var(–g3);pointer-events:none;font-family:var(–fontb);
-}
-
-/* map layer */
-#mapWrap{position:absolute;inset:0;z-index:1;transition:opacity .25s}
+/* LEFT: map */
+.panel-left{position:relative;overflow:hidden}
 #map{width:100%;height:100%}
 .map-msg{
-position:absolute;inset:0;display:flex;flex-direction:column;
-align-items:center;justify-content:center;gap:.5rem;z-index:2;pointer-events:none;
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:.5rem;z-index:2;pointer-events:none;
 }
-.map-msg-txt{font-family:var(–fontb);font-size:.55rem;color:var(–g3);text-align:center;line-height:1.6}
-
-/* pace layer */
-#paceWrap{
-position:absolute;inset:0;z-index:2;
-display:flex;flex-direction:column;
-opacity:0;pointer-events:none;transition:opacity .25s;
-}
-#paceWrap.active{opacity:1;pointer-events:auto}
-#mapWrap.hidden{opacity:0;pointer-events:none}
-#paceCanvas{width:100%;flex:1;display:block}
-
-/* pace picker overlay */
-.pace-picker-wrap{
-flex-shrink:0;border-top:1px solid var(–g2);
-display:flex;flex-direction:column;align-items:center;
-padding:.3rem .4rem .35rem;gap:.15rem;
-background:var(–black);
-}
-.pace-picker-lbl{font-size:.42rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(–g4)}
-.pace-picker-val{font-size:1rem;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.03em}
-
-/* Drum wheel */
-.drum-outer{
-position:relative;width:100%;height:3rem;overflow:hidden;
-border-top:1px solid var(–g3);border-bottom:1px solid var(–g3);
-}
-.drum-track{
-display:flex;flex-direction:column;
-position:absolute;left:0;right:0;top:0;
-will-change:transform;
-}
-.drum-item{
-height:3rem;display:flex;align-items:center;justify-content:center;
-font-size:.85rem;font-weight:500;font-variant-numeric:tabular-nums;
-color:var(–g4);flex-shrink:0;letter-spacing:.04em;
-transition:color .15s;
-}
-.drum-item.selected{color:var(–white);font-weight:700}
-/* fade top/bottom */
-.drum-outer::before,.drum-outer::after{
-content:’’;position:absolute;left:0;right:0;height:1rem;z-index:2;pointer-events:none;
-}
-.drum-outer::before{top:0;background:linear-gradient(to bottom,var(–black),transparent)}
-.drum-outer::after{bottom:0;background:linear-gradient(to top,var(–black),transparent)}
+.map-msg-txt{font-family:var(--fontb);font-size:.55rem;color:var(--g3);text-align:center;line-height:1.6}
 
 /* CENTER */
 .panel-main{display:flex;flex-direction:column}
 .rate-block{
-flex:0 0 55%;display:flex;flex-direction:column;
-align-items:center;justify-content:center;
-padding:.5rem .4rem .3rem;border-bottom:1px solid var(–g2);
+  flex:0 0 55%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:.5rem .4rem .3rem;border-bottom:1px solid var(--g2);
 }
-.rate-lbl{font-size:.45rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(–g4);margin-bottom:.3rem}
+.rate-lbl{font-size:.45rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--g4);margin-bottom:.3rem}
 .rate-num{
-font-size:min(7.5rem,23vw);font-weight:700;line-height:.88;
-letter-spacing:-.03em;font-variant-numeric:tabular-nums;
-color:var(–g3);transition:color .2s;
+  font-size:min(7.5rem,23vw);font-weight:700;line-height:.88;
+  letter-spacing:-.03em;font-variant-numeric:tabular-nums;
+  color:var(--g3);transition:color .2s;
 }
-.rate-num.active{color:var(–white)}
-.rate-num.warn{color:var(–red)}
-.rate-unit{font-size:.5rem;font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:var(–g4);margin-top:.35rem}
+.rate-num.active{color:var(--white)}
+.rate-num.warn{color:var(--red)}
+.rate-unit{font-size:.5rem;font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:var(--g4);margin-top:.35rem}
 .sens-bar{
-width:60%;height:1px;background:var(–g2);margin-top:.4rem;
-visibility:hidden;position:relative;overflow:hidden;
+  width:60%;height:1px;background:var(--g2);margin-top:.4rem;
+  visibility:hidden;position:relative;overflow:hidden;
 }
 .sens-bar.show{visibility:visible}
-.sens-fill{position:absolute;left:0;top:0;height:100%;width:0;background:var(–white);transition:width .07s}
+.sens-fill{position:absolute;left:0;top:0;height:100%;width:0;background:var(--white);transition:width .07s}
 
 .split-block{
-flex:1;display:flex;flex-direction:column;
-align-items:center;justify-content:center;
-padding:.3rem .4rem;border-bottom:1px solid var(–g2);gap:.1rem;
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:.3rem .4rem;border-bottom:1px solid var(--g2);gap:.1rem;
 }
-.split-lbl{font-size:.45rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(–g4)}
-.split-num{font-size:min(2.6rem,8vw);font-weight:300;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:var(–white)}
-.split-num.dim{color:var(–g3)}
+.split-lbl{font-size:.45rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--g4)}
+.split-num{font-size:min(2.6rem,8vw);font-weight:300;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:var(--white)}
+.split-num.dim{color:var(--g3)}
 
 .ctrl-block{padding:.5rem .6rem;display:flex;flex-direction:column;gap:.3rem}
 .sr-row{
-display:flex;align-items:center;gap:.4rem;
-font-size:.45rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(–g4);
-visibility:hidden;
+  display:flex;align-items:center;gap:.4rem;
+  font-size:.45rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--g4);
+  visibility:hidden;
 }
 .sr-row.show{visibility:visible}
-.sr-row input{flex:1;accent-color:var(–white);height:.7rem}
+.sr-row input{flex:1;accent-color:var(--white);height:.7rem}
 .sr-val{width:1.2rem;text-align:right;font-variant-numeric:tabular-nums}
 .main-btn{
-width:100%;height:2.4rem;background:none;border:1px solid var(–g3);color:var(–white);
-font-family:var(–font);font-size:.7rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
-cursor:pointer;transition:border-color .1s,background .1s;
+  width:100%;height:2.4rem;background:none;border:1px solid var(--g3);color:var(--white);
+  font-family:var(--font);font-size:.7rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+  cursor:pointer;transition:border-color .1s,background .1s;
 }
-.main-btn:active{background:var(–g2)}
-.main-btn.running{border-color:var(–red);color:var(–red)}
+.main-btn:active{background:var(--g2)}
+.main-btn.running{border-color:var(--red);color:var(--red)}
 .rst-btn{
-background:none;border:none;color:var(–g3);font-family:var(–fontb);
-font-size:.52rem;font-weight:400;letter-spacing:.06em;cursor:pointer;text-align:center;
+  background:none;border:none;color:var(--g3);font-family:var(--fontb);
+  font-size:.52rem;font-weight:400;letter-spacing:.06em;cursor:pointer;text-align:center;
 }
-.rst-btn:active{color:var(–g5)}
+.rst-btn:active{color:var(--g5)}
 
 /* RIGHT */
-.panel-stats{display:flex;flex-direction:column}
 .stats-hdr{
-padding:.55rem .65rem .4rem;border-bottom:1px solid var(–g2);
-font-size:.45rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(–g4);flex-shrink:0;
+  padding:.55rem .65rem .4rem;border-bottom:1px solid var(--g2);
+  font-size:.45rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--g4);flex-shrink:0;
 }
-.stats-list{flex:1;display:flex;flex-direction:column;justify-content:space-around}
+.stats-list{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr)}
 .stat{
-padding:0 .65rem;border-bottom:1px solid var(–g2);
-display:flex;flex-direction:column;justify-content:center;flex:1;
+  padding:0 .65rem;border-right:1px solid var(--g2);border-bottom:1px solid var(--g2);
+  display:flex;flex-direction:column;justify-content:center;
 }
-.stat:last-child{border-bottom:none}
+.stat:nth-child(even){border-right:none}
+.stat:nth-child(5),.stat:nth-child(6){border-bottom:none}
 .stat-val{
-font-size:min(1.45rem,4.2vw);font-weight:500;font-variant-numeric:tabular-nums;
-color:var(–white);line-height:1.15;letter-spacing:-.01em;
+  font-size:min(1.45rem,4.2vw);font-weight:500;font-variant-numeric:tabular-nums;
+  color:var(--white);line-height:1.15;letter-spacing:-.01em;
 }
-.stat-val .unit{font-size:.6em;font-weight:400;color:var(–g4)}
-.stat-lbl{font-family:var(–fontb);font-size:.45rem;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:var(–g4);margin-top:.05rem}
-
+.stat-val .unit{font-size:.6em;font-weight:400;color:var(--g4)}
+.stat-lbl{font-family:var(--fontb);font-size:.45rem;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:var(--g4);margin-top:.05rem}
 .panel-right{position:relative;overflow:hidden;cursor:pointer}
 .leaflet-container{background:#000!important}
 .leaflet-control-attribution{display:none!important}
+
+/* ── portrait layout ── */
+#portrait{display:none;flex-direction:column;flex:1;min-height:0}
+@media (orientation:portrait){
+  .cockpit{display:none}
+  #portrait{display:flex}
+}
+.p-rate-block{
+  flex:0 0 42%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  border-bottom:1px solid var(--g2);
+}
+.p-lbl{font-size:.45rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--g4);margin-bottom:.3rem}
+.p-rate{
+  font-size:min(9rem,38vw);font-weight:700;line-height:.88;
+  letter-spacing:-.03em;font-variant-numeric:tabular-nums;
+  color:var(--g3);transition:color .2s;
+}
+.p-rate.active{color:var(--white)}
+.p-rate.warn{color:var(--red)}
+.p-unit{font-size:.5rem;font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:var(--g4);margin-top:.4rem}
+.p-split{font-size:min(3.2rem,13vw);font-weight:300;font-variant-numeric:tabular-nums;color:var(--white);letter-spacing:-.01em;margin-top:.5rem;line-height:1}
+.p-split.dim{color:var(--g3)}
+.p-split-lbl{font-size:.4rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--g4);margin-top:.2rem}
+.p-grid{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0;margin:1rem;gap:.6rem;align-content:center}
+.p-cell{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:.5rem .7rem;
+  border:1px solid var(--g2);
+}
+.p-val{
+  font-size:min(2rem,8vw);font-weight:500;
+  font-variant-numeric:tabular-nums;
+  color:var(--white);letter-spacing:-.01em;line-height:1.1;
+}
+.p-unit-sm{font-size:.7em;color:var(--g4)}
+.p-meta{
+  font-family:var(--fontb);font-size:.45rem;font-weight:400;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--g4);margin-top:.1rem;
+}
+.p-ctrl{
+  padding:.5rem .6rem;display:flex;flex-direction:column;gap:.3rem;
+  border-top:1px solid var(--g2);
+}
 </style>
 
 </head>
@@ -236,81 +222,94 @@ color:var(–white);line-height:1.15;letter-spacing:-.01em;
     <span class="hdr-s" id="hdrStatus"></span>
   </div>
 
+  <!-- Landscape: three-panel cockpit -->
   <div class="cockpit">
 
-```
-<!-- LEFT: map / pace toggle -->
-<div class="panel panel-left" id="leftPanel">
-  <div class="panel-label" id="leftLabel">Route</div>
-  <div class="tap-hint" id="tapHint">antippen zum wechseln</div>
-
-  <!-- Map -->
-  <div id="mapWrap">
-    <div class="map-msg" id="mapMsg">
-      <div class="map-msg-txt">Karte erscheint<br>mit GPS-Signal</div>
+    <!-- LEFT: map -->
+    <div class="panel panel-left">
+      <div class="map-msg" id="mapMsg">
+        <div class="map-msg-txt">Karte erscheint<br>mit GPS-Signal</div>
+      </div>
+      <div id="map"></div>
     </div>
-    <div id="map"></div>
-  </div>
 
-  <!-- Pace boat view -->
-  <div id="paceWrap">
-    <canvas id="paceCanvas"></canvas>
-    <div class="pace-picker-wrap">
-      <div class="pace-picker-lbl">Pace-Boot Split</div>
-      <div class="pace-picker-val" id="pacePickerVal">2:00.0</div>
-      <div class="drum-outer" id="drumOuter">
-        <div class="drum-track" id="drumTrack"></div>
+    <!-- CENTER -->
+    <div class="panel panel-main">
+      <div class="rate-block">
+        <div class="rate-lbl">Schläge / min</div>
+        <div class="rate-num" id="rate">0</div>
+        <div class="sens-bar" id="sensBar"><div class="sens-fill" id="sensFill"></div></div>
+        <div class="rate-unit">S / MIN</div>
+      </div>
+      <div class="split-block">
+        <div class="split-lbl">Split / 500 m</div>
+        <div class="split-num dim" id="split">–:––</div>
+      </div>
+      <div class="ctrl-block">
+        <div class="sr-row" id="srRow">
+          <span>Sens</span>
+          <input type="range" id="ss" min="1" max="10" step=".5" value="3">
+          <span class="sr-val" id="svl">3</span>
+        </div>
+        <button class="main-btn" id="btn">Start</button>
+        <button class="rst-btn" id="rst">↺ Zurücksetzen</button>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- CENTER -->
-<div class="panel panel-main">
-  <div class="rate-block">
-    <div class="rate-lbl">Schläge / min</div>
-    <div class="rate-num" id="rate">0</div>
-    <div class="sens-bar" id="sensBar"><div class="sens-fill" id="sensFill"></div></div>
-    <div class="rate-unit">S / MIN</div>
-  </div>
-  <div class="split-block">
-    <div class="split-lbl">Split / 500 m</div>
-    <div class="split-num dim" id="split">–:––</div>
-  </div>
-  <div class="ctrl-block">
-    <div class="sr-row" id="srRow">
-      <span>Sens</span>
-      <input type="range" id="ss" min="1" max="10" step=".5" value="3">
-      <span class="sr-val" id="svl">3</span>
+    <!-- RIGHT: stats / force curve toggle -->
+    <div class="panel panel-right" id="rightPanel">
+      <div id="statsWrap" style="display:flex;flex-direction:column;height:100%">
+        <div class="stats-hdr" style="cursor:pointer">Statistik <span style="color:var(--g3);font-size:.4rem;letter-spacing:.05em">antippen</span></div>
+        <div class="stats-list">
+          <div class="stat"><div class="stat-val" id="time">00:00</div><div class="stat-lbl">Zeit</div></div>
+          <div class="stat"><div class="stat-val"><span id="dist">0</span><span class="unit" id="du"> m</span></div><div class="stat-lbl">Distanz</div></div>
+          <div class="stat"><div class="stat-val"><span id="avgSplit">–:––</span></div><div class="stat-lbl">Ø Split / 500 m</div></div>
+          <div class="stat"><div class="stat-val"><span id="avgR">0</span></div><div class="stat-lbl">Ø Schlagzahl</div></div>
+          <div class="stat"><div class="stat-val"><span id="dps">0.0</span><span class="unit"> m</span></div><div class="stat-lbl">Meter / Schlag</div></div>
+          <div class="stat"><div class="stat-val"><span id="curSplit">–:––</span></div><div class="stat-lbl">Split / 500 m</div></div>
+        </div>
+      </div>
+      <div id="forceWrap" style="display:none;flex-direction:column;height:100%">
+        <div class="stats-hdr" style="cursor:pointer">Kraftkurve <span style="color:var(--g3);font-size:.4rem;letter-spacing:.05em">antippen</span></div>
+        <canvas id="forceCanvas" style="flex:1;width:100%;display:block"></canvas>
+      </div>
     </div>
-    <button class="main-btn" id="btn">Start</button>
-    <button class="rst-btn" id="rst">↺ Zurücksetzen</button>
-  </div>
-</div>
 
-<!-- RIGHT: stats / force curve toggle -->
-<div class="panel panel-right" id="rightPanel">
-  <!-- Stats view -->
-  <div id="statsWrap" style="display:flex;flex-direction:column;height:100%">
-    <div class="stats-hdr" style="cursor:pointer">Statistik <span style="color:var(--g3);font-size:.4rem;letter-spacing:.05em">antippen</span></div>
-    <div class="stats-list">
-      <div class="stat"><div class="stat-val" id="time">00:00</div><div class="stat-lbl">Zeit</div></div>
-      <div class="stat"><div class="stat-val"><span id="dist">0</span><span class="unit" id="du"> m</span></div><div class="stat-lbl">Distanz</div></div>
-      <div class="stat"><div class="stat-val"><span id="avgSplit">–:––</span></div><div class="stat-lbl">Ø Split / 500 m</div></div>
-      <div class="stat"><div class="stat-val"><span id="avgR">0</span></div><div class="stat-lbl">Ø Schlagzahl</div></div>
-      <div class="stat"><div class="stat-val"><span id="dps">0.0</span><span class="unit"> m</span></div><div class="stat-lbl">Meter / Schlag</div></div>
-      <div class="stat"><div class="stat-val"><span id="spd">0.0</span><span class="unit"> km/h</span></div><div class="stat-lbl">Tempo</div></div>
+  </div>
+
+  <!-- Portrait: compact view -->
+  <div id="portrait">
+    <div class="p-rate-block">
+      <div class="p-lbl">Schläge / min</div>
+      <div class="p-rate" id="pRate">0</div>
+      <div class="p-unit">S / MIN</div>
+      <div class="p-split dim" id="pSplit">–:––</div>
+      <div class="p-split-lbl">Split / 500 m</div>
+    </div>
+    <div class="p-grid">
+      <div class="p-cell">
+        <div class="p-val" id="pTime">00:00</div>
+        <div class="p-meta">Zeit</div>
+      </div>
+      <div class="p-cell">
+        <div class="p-val"><span id="pDist">0</span><span class="p-unit-sm" id="pDistU"> m</span></div>
+        <div class="p-meta">Distanz</div>
+      </div>
+      <div class="p-cell">
+        <div class="p-val" id="pAvgR">0</div>
+        <div class="p-meta">Ø Schlagzahl</div>
+      </div>
+      <div class="p-cell">
+        <div class="p-val" id="pAvgSplit">–:––</div>
+        <div class="p-meta">Ø Split / 500 m</div>
+      </div>
+    </div>
+    <div class="p-ctrl">
+      <button class="main-btn" id="pBtn">Start</button>
+      <button class="rst-btn" id="pRst">↺ Zurücksetzen</button>
     </div>
   </div>
-  <!-- Force curve view -->
-  <div id="forceWrap" style="display:none;flex-direction:column;height:100%">
-    <div class="stats-hdr" style="cursor:pointer">Kraftkurve <span style="color:var(--g3);font-size:.4rem;letter-spacing:.05em">antippen</span></div>
-    <canvas id="forceCanvas" style="flex:1;width:100%;display:block"></canvas>
-  </div>
-</div>
-```
 
-  </div>
 </div>
 
 <script>
@@ -325,27 +324,24 @@ let tickId=null, decayId=null, wakeLock=null;
 let lastVis=0, curSpd=0;
 let gHist=[], tPts=[];
 let map=null, tLine=null, pMark=null, mapOk=false;
-let leftMode='map'; // 'map' | 'pace'
-let rightMode='stats'; // 'stats' | 'force'
-// Force curve: ring buffer of raw accel samples
+let rightMode='stats';
 const FORCE_BUF=300;
 let forceBuf=new Float32Array(FORCE_BUF);
 let forceBufIdx=0;
 let forceRafId=null;
-let forceMax=1; // rolling max for autoscale
-let paceRafId=null;
-let paceSplitSec=120; // default 2:00 /500m → speed = 500/120 m/s
+let forceMax=1;
 
 /* ── DOM ── */
 const $=id=>document.getElementById(id);
 const eR=$('rate'),eSp=$('split'),eT=$('time'),eD=$('dist'),eDu=$('du');
-const eA=$('avgR'),eDps=$('dps'),eSpd=$('spd'),eAvgSp=$('avgSplit');
+const eA=$('avgR'),eDps=$('dps'),eCurSplit=$('curSplit'),eAvgSp=$('avgSplit');
 const eF=$('flash'),eSFill=$('sensFill'),eSBar=$('sensBar'),eSrRow=$('srRow');
 const eBtn=$('btn'),eSvl=$('svl'),eMm=$('mapMsg'),eHdr=$('hdrStatus');
-const eLeftPanel=$('leftPanel'),eLeftLabel=$('leftLabel'),eTapHint=$('tapHint');
-const eMapWrap=$('mapWrap'),ePaceWrap=$('paceWrap');
-const eCanvas=$('paceCanvas');
-const ctx=eCanvas.getContext('2d');
+const eRightPanel=$('rightPanel'),eStatsWrap=$('statsWrap'),eForceWrap=$('forceWrap');
+const eForceCanvas=$('forceCanvas');
+const fctx=eForceCanvas.getContext('2d');
+const ePBtn=$('pBtn'),ePRate=$('pRate'),ePSplit=$('pSplit'),ePTime=$('pTime');
+const ePDist=$('pDist'),ePDistU=$('pDistU'),ePAvgR=$('pAvgR'),ePAvgSplit=$('pAvgSplit');
 
 $('ss').addEventListener('input',e=>{sens=parseFloat(e.target.value);eSvl.textContent=e.target.value});
 document.addEventListener('dblclick',e=>e.preventDefault());
@@ -363,12 +359,6 @@ $('permBtn').addEventListener('click',async()=>{
 $('permSkip').addEventListener('click',()=>$('permOverlay').style.display='none');
 
 /* ── Right panel toggle ── */
-const eRightPanel=$('rightPanel');
-const eStatsWrap=$('statsWrap');
-const eForceWrap=$('forceWrap');
-const eForceCanvas=$('forceCanvas');
-const fctx=eForceCanvas.getContext('2d');
-
 eRightPanel.addEventListener('click',()=>{
   rightMode=rightMode==='stats'?'force':'stats';
   if(rightMode==='force'){
@@ -401,21 +391,18 @@ function drawForce(){
   fctx.fillStyle='#000';
   fctx.fillRect(0,0,W,H);
 
-  // Collect samples in chronological order
   const n=FORCE_BUF;
   const total=forceBufIdx;
-  const samples=[];
+  const samples=new Float32Array(n);
+  let curMax=0.5;
   for(let i=0;i<n;i++){
-    const idx=(total-n+i+n)%n;
-    samples.push(forceBuf[idx]);
+    const v=forceBuf[(total-n+i+n)%n];
+    samples[i]=v;
+    if(v>curMax)curMax=v;
   }
-
-  // Rolling max for autoscale (smooth)
-  const curMax=Math.max(...samples,0.5);
   forceMax=forceMax*0.96+curMax*0.04;
   const scale=forceMax<0.1?1:forceMax;
 
-  // Horizontal grid lines (4 divisions)
   fctx.strokeStyle='rgba(255,255,255,0.05)';
   fctx.lineWidth=1;
   for(let g=1;g<4;g++){
@@ -423,12 +410,8 @@ function drawForce(){
     fctx.beginPath();fctx.moveTo(0,y);fctx.lineTo(W,y);fctx.stroke();
   }
 
-  // Stroke marker lines – vertical lines at each detected stroke
-  // We mark the last few strokes using lastStrokeT
-  // (stored in recentStrokes array)
   if(recentStrokeTimes.length>0){
     const nowMs=Date.now();
-    // each sample is ~16ms apart (60Hz)
     const msPerSample=16;
     fctx.strokeStyle='rgba(255,255,255,0.15)';
     fctx.lineWidth=1;
@@ -436,13 +419,10 @@ function drawForce(){
       const msSince=nowMs-t;
       const samplesAgo=msSince/msPerSample;
       const x=W-(samplesAgo/n)*W;
-      if(x>0&&x<W){
-        fctx.beginPath();fctx.moveTo(x,0);fctx.lineTo(x,H);fctx.stroke();
-      }
+      if(x>0&&x<W){fctx.beginPath();fctx.moveTo(x,0);fctx.lineTo(x,H);fctx.stroke();}
     });
   }
 
-  // Force curve
   fctx.beginPath();
   for(let i=0;i<n;i++){
     const x=(i/(n-1))*W;
@@ -453,13 +433,10 @@ function drawForce(){
   fctx.lineWidth=1.2;
   fctx.lineJoin='round';
   fctx.stroke();
-
-  // Fill under curve
   fctx.lineTo(W,H);fctx.lineTo(0,H);fctx.closePath();
   fctx.fillStyle='rgba(255,255,255,0.04)';
   fctx.fill();
 
-  // "No sensor" hint
   if(!sOk){
     fctx.font=`400 ${Math.max(8,Math.round(W*0.08))}px 'Barlow',sans-serif`;
     fctx.fillStyle='rgba(255,255,255,0.2)';
@@ -477,343 +454,6 @@ function startForceAnim(){
 function stopForceAnim(){
   if(forceRafId){cancelAnimationFrame(forceRafId);forceRafId=null;}
 }
-
-/* ── Left panel toggle ── */
-eLeftPanel.addEventListener('click',e=>{
-  // Don't toggle when interacting with drum
-  if(e.target.closest('#drumOuter'))return;
-  leftMode=leftMode==='map'?'pace':'map';
-  applyLeftMode();
-});
-
-function applyLeftMode(){
-  if(leftMode==='pace'){
-    eMapWrap.classList.add('hidden');
-    ePaceWrap.classList.add('active');
-    eLeftLabel.textContent='Pace-Boot';
-    startPaceAnim();
-  }else{
-    eMapWrap.classList.remove('hidden');
-    ePaceWrap.classList.remove('active');
-    eLeftLabel.textContent='Route';
-    stopPaceAnim();
-  }
-}
-
-/* ── Drum wheel picker ── */
-// Generate splits from 1:20 to 4:00 in 2.5s steps
-const DRUM_ITEMS=[];
-for(let sec=80;sec<=240;sec+=2.5){
-  const m=Math.floor(sec/60),s=sec%60;
-  DRUM_ITEMS.push({sec,label:`${m}:${String(Math.floor(s)).padStart(2,'0')}.${Math.round((s%1)*10)}`});
-}
-
-const eDrumTrack=$('drumTrack');
-const eDrumOuter=$('drumOuter');
-const ePickerVal=$('pacePickerVal');
-const ITEM_H=48; // matches 3rem at default
-let drumIdx=DRUM_ITEMS.findIndex(d=>d.sec===paceSplitSec)||16;
-let drumY=0, drumTargetY=0, drumDragging=false;
-let drumStartY=0, drumStartOffset=0, drumVel=0, drumLastY=0, drumLastT=0;
-let drumAnimId=null;
-
-function buildDrum(){
-  eDrumTrack.innerHTML='';
-  DRUM_ITEMS.forEach((it,i)=>{
-    const div=document.createElement('div');
-    div.className='drum-item';
-    div.textContent=it.label;
-    eDrumTrack.appendChild(div);
-  });
-  drumIdx=DRUM_ITEMS.findIndex(d=>d.sec>=paceSplitSec)||16;
-  drumY=drumTargetY=-drumIdx*ITEM_H;
-  applyDrumY(drumY);
-  highlightDrum();
-}
-
-function applyDrumY(y){
-  eDrumTrack.style.transform=`translateY(${y+(ITEM_H/2)}px)`;
-}
-
-function highlightDrum(){
-  const idx=Math.round(-drumY/ITEM_H);
-  Array.from(eDrumTrack.children).forEach((el,i)=>el.classList.toggle('selected',i===idx));
-  const clamped=Math.max(0,Math.min(DRUM_ITEMS.length-1,idx));
-  paceSplitSec=DRUM_ITEMS[clamped].sec;
-  ePickerVal.textContent=DRUM_ITEMS[clamped].label;
-  drumIdx=clamped;
-}
-
-function snapDrum(){
-  const idx=Math.round(-drumY/ITEM_H);
-  const clamped=Math.max(0,Math.min(DRUM_ITEMS.length-1,idx));
-  drumTargetY=-clamped*ITEM_H;
-  animSnap();
-}
-
-function animSnap(){
-  cancelAnimationFrame(drumAnimId);
-  const step=()=>{
-    drumY+=(drumTargetY-drumY)*.18;
-    if(Math.abs(drumTargetY-drumY)<.3){drumY=drumTargetY;applyDrumY(drumY);highlightDrum();return;}
-    applyDrumY(drumY);highlightDrum();
-    drumAnimId=requestAnimationFrame(step);
-  };
-  drumAnimId=requestAnimationFrame(step);
-}
-
-// Touch/pointer events for drum
-function drumPointerStart(e){
-  e.stopPropagation();
-  cancelAnimationFrame(drumAnimId);
-  drumDragging=true;
-  drumStartY=e.touches?e.touches[0].clientY:e.clientY;
-  drumStartOffset=drumY;
-  drumVel=0;drumLastY=drumStartY;drumLastT=Date.now();
-}
-function drumPointerMove(e){
-  if(!drumDragging)return;
-  e.stopPropagation();e.preventDefault();
-  const cy=e.touches?e.touches[0].clientY:e.clientY;
-  const now=Date.now();
-  drumVel=(cy-drumLastY)/(now-drumLastT+1)*16;
-  drumLastY=cy;drumLastT=now;
-  drumY=drumStartOffset+(cy-drumStartY);
-  applyDrumY(drumY);highlightDrum();
-}
-function drumPointerEnd(e){
-  if(!drumDragging)return;
-  drumDragging=false;
-  // Apply inertia
-  let vel=drumVel;
-  const inertia=()=>{
-    vel*=.88;drumY+=vel;
-    applyDrumY(drumY);highlightDrum();
-    if(Math.abs(vel)>0.5){drumAnimId=requestAnimationFrame(inertia);}
-    else{snapDrum();}
-  };
-  if(Math.abs(vel)>1)requestAnimationFrame(inertia);
-  else snapDrum();
-}
-
-eDrumOuter.addEventListener('touchstart',drumPointerStart,{passive:true});
-eDrumOuter.addEventListener('touchmove',drumPointerMove,{passive:false});
-eDrumOuter.addEventListener('touchend',drumPointerEnd);
-eDrumOuter.addEventListener('mousedown',drumPointerStart);
-window.addEventListener('mousemove',drumPointerMove);
-window.addEventListener('mouseup',drumPointerEnd);
-
-buildDrum();
-
-/* ── Pace boat canvas animation ── */
-// Race: 2000m regatta lane view from above, schematic
-// myBoat position based on tDist, paceBoat based on elapsed + paceSplitSec
-let paceBoatDist=0;
-let myBoatDist=0; // same as tDist
-
-function startPaceAnim(){
-  if(paceRafId)return;
-  resizePaceCanvas();
-  const draw=()=>{
-    drawPace();
-    paceRafId=requestAnimationFrame(draw);
-  };
-  paceRafId=requestAnimationFrame(draw);
-}
-function stopPaceAnim(){
-  if(paceRafId){cancelAnimationFrame(paceRafId);paceRafId=null;}
-}
-
-function resizePaceCanvas(){
-  const rect=eCanvas.getBoundingClientRect();
-  if(rect.width===0||rect.height===0)return;
-  eCanvas.width =Math.round(rect.width *window.devicePixelRatio);
-  eCanvas.height=Math.round(rect.height*window.devicePixelRatio);
-  // reset transform each time
-  ctx.setTransform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
-}
-
-const RACE_M=2000;
-
-function drawPace(){
-  const rect=eCanvas.getBoundingClientRect();
-  const W=rect.width, H=rect.height;
-  if(W===0||H===0)return;
-
-  // Re-sync canvas resolution if panel size changed
-  if(eCanvas.width!==Math.round(W*window.devicePixelRatio)||
-     eCanvas.height!==Math.round(H*window.devicePixelRatio)){
-    resizePaceCanvas();
-  }
-
-  ctx.clearRect(0,0,W,H);
-
-  // Update positions
-  paceBoatDist=app==='running'?(elapsed*(500/paceSplitSec)):paceBoatDist;
-  myBoatDist=tDist;
-
-  // ── Layout: vertical race, bug points UP (y=0), stern at bottom (y=H)
-  // Two lanes side by side, race runs bottom→top
-  // Distance 0 = bottom, RACE_M = top
-  const viewM   = 350;
-  const leadDist= Math.max(paceBoatDist, myBoatDist, 1);
-  const camMid  = leadDist > viewM/2 ? leadDist - viewM*0.28 : viewM/2;
-  const camBot  = camMid - viewM/2;
-
-  // distance → y  (0m = bottom, RACE_M = top)
-  const toY = d => H - ((d - camBot) / viewM) * H;
-
-  // Two lanes side by side
-  const laneW  = W * 0.36;
-  const lane1X = W * 0.25; // pace lane center
-  const lane2X = W * 0.75; // my lane center
-
-  // ── Water ──
-  ctx.fillStyle='#030608';
-  ctx.fillRect(0,0,W,H);
-
-  // Subtle vertical water lines
-  ctx.strokeStyle='rgba(255,255,255,0.025)';
-  ctx.lineWidth=1;
-  for(let x=0;x<W;x+=10){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-
-  // Lane fills
-  ctx.fillStyle='rgba(255,255,255,0.018)';
-  ctx.fillRect(lane1X-laneW/2,0,laneW,H);
-  ctx.fillRect(lane2X-laneW/2,0,laneW,H);
-
-  // Lane boundary lines (vertical dashed)
-  function vLine(x){
-    ctx.save();
-    ctx.strokeStyle='rgba(255,255,255,0.1)';
-    ctx.lineWidth=1;ctx.setLineDash([4,8]);
-    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
-  }
-  vLine(lane1X-laneW/2); vLine(lane1X+laneW/2);
-  vLine(lane2X-laneW/2); vLine(lane2X+laneW/2);
-
-  // Lane labels at top
-  const lfs=Math.max(7,Math.round(W*0.055));
-  ctx.save();
-  ctx.font=`500 ${lfs}px 'Barlow Condensed',sans-serif`;
-  ctx.fillStyle='rgba(255,255,255,0.18)';
-  ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.fillText('PACE', lane1X, 6);
-  ctx.fillText('ICH',  lane2X, 6);
-  ctx.restore();
-
-  // Distance markers (horizontal dashed lines)
-  const markerStep=100;
-  for(let m=0;m<=RACE_M;m+=markerStep){
-    const y=toY(m);
-    if(y<-10||y>H+10)continue;
-    ctx.save();
-    ctx.strokeStyle='rgba(255,255,255,0.06)';
-    ctx.lineWidth=1;ctx.setLineDash([2,5]);
-    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
-    ctx.setLineDash([]);
-    if(m>0&&m<RACE_M){
-      ctx.font=`400 ${Math.max(7,Math.round(W*0.048))}px 'Barlow',sans-serif`;
-      ctx.fillStyle='rgba(255,255,255,0.18)';
-      ctx.textAlign='left'; ctx.textBaseline='middle';
-      ctx.fillText(m+'m', 3, y);
-    }
-    ctx.restore();
-  }
-
-  // Start line
-  const startY=toY(0);
-  if(startY>-2&&startY<H+2){
-    ctx.save();
-    ctx.strokeStyle='rgba(255,255,255,0.28)';ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.moveTo(0,startY);ctx.lineTo(W,startY);ctx.stroke();
-    ctx.font=`500 ${Math.max(7,Math.round(W*0.052))}px 'Barlow Condensed',sans-serif`;
-    ctx.fillStyle='rgba(255,255,255,0.28)';ctx.textAlign='right';ctx.textBaseline='bottom';
-    ctx.fillText('START',W-3,startY-2);
-    ctx.restore();
-  }
-
-  // Finish line
-  const finY=toY(RACE_M);
-  if(finY>-2&&finY<H+2){
-    ctx.save();
-    ctx.strokeStyle='rgba(255,255,255,0.35)';ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.moveTo(0,finY);ctx.lineTo(W,finY);ctx.stroke();
-    ctx.font=`500 ${Math.max(7,Math.round(W*0.052))}px 'Barlow Condensed',sans-serif`;
-    ctx.fillStyle='rgba(255,255,255,0.35)';ctx.textAlign='right';ctx.textBaseline='top';
-    ctx.fillText('ZIEL',W-3,finY+2);
-    ctx.restore();
-  }
-
-  // ── Draw boat: vertical needle, bow=top ──
-  function drawBoat(distM, cx, col){
-    const y   = toY(distM);
-    // hull proportions relative to panel height
-    const bL  = Math.min(H*0.18, laneW*0.55);  // hull length (vertical)
-    const bW  = bL * 0.13;                       // beam (very narrow)
-    const bowY   = y - bL*0.5;   // top
-    const sternY = y + bL*0.5;   // bottom
-
-    // Wake – two thin lines spreading downward from stern
-    const wAlpha = Math.min(0.3, distM/150);
-    ctx.save();
-    ctx.strokeStyle = col.replace(/[\d.]+\)$/, `${wAlpha})`);
-    ctx.lineWidth=0.8; ctx.setLineDash([2,7]);
-    const wakeLen = Math.min(bL*1.8, distM*0.015+6);
-    ctx.beginPath(); ctx.moveTo(cx-bW*0.2, sternY); ctx.lineTo(cx-bW*1.8, sternY+wakeLen); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx+bW*0.2, sternY); ctx.lineTo(cx+bW*1.8, sternY+wakeLen); ctx.stroke();
-    ctx.setLineDash([]); ctx.restore();
-
-    // Hull – vertical needle bezier
-    ctx.save();
-    ctx.beginPath();
-    // left edge: stern→bow
-    ctx.moveTo(cx, bowY);
-    ctx.bezierCurveTo(
-      cx-bW*0.9, bowY  +bL*0.2,
-      cx-bW*0.75, sternY-bL*0.15,
-      cx, sternY
-    );
-    // right edge: stern→bow
-    ctx.bezierCurveTo(
-      cx+bW*0.75, sternY-bL*0.15,
-      cx+bW*0.9,  bowY  +bL*0.2,
-      cx, bowY
-    );
-    ctx.closePath();
-    ctx.fillStyle   = col.replace(/[\d.]+\)$/, '0.12)');
-    ctx.strokeStyle = col;
-    ctx.lineWidth   = Math.max(1, bW*0.4);
-    ctx.lineJoin    = 'round';
-    ctx.fill(); ctx.stroke();
-    ctx.restore();
-  }
-
-  drawBoat(Math.min(paceBoatDist,RACE_M), lane1X, 'rgba(255,50,50,1)');
-  drawBoat(Math.min(myBoatDist,  RACE_M), lane2X, 'rgba(255,255,255,1)');
-
-  // Gap readout in the centre strip between lanes
-  const gap    = paceBoatDist - myBoatDist;
-  const gapAbs = Math.abs(gap);
-  const gapStr = gapAbs<1 ? '––' : (gap>0?'+':'–')+gapAbs.toFixed(0)+'m';
-  const gapCol = gap>3 ? 'rgba(255,80,80,0.9)' : gap<-3 ? 'rgba(160,255,160,0.9)' : 'rgba(255,255,255,0.45)';
-  const gapFS  = Math.max(9, Math.round(W*0.1));
-  ctx.save();
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.font=`700 ${gapFS}px 'Barlow Condensed',sans-serif`;
-  ctx.fillStyle=gapCol;
-  ctx.fillText(gapStr, W/2, H/2);
-  ctx.font=`400 ${Math.max(7,Math.round(W*0.06))}px 'Barlow',sans-serif`;
-  ctx.fillStyle='rgba(255,255,255,0.2)';
-  ctx.fillText('Δ', W/2, H/2 + gapFS*0.9);
-  ctx.restore();
-}
-
-window.addEventListener('resize',()=>{
-  if(leftMode==='pace')resizePaceCanvas();
-});
 
 /* ── Map ── */
 function initMap(lat,lon){
@@ -844,17 +484,39 @@ function fmtSplit(v){
 
 /* ── UI ── */
 function ui(){
+  const ss=fmtSplit(curSpd);
+  const mins=elapsed/60;
+  const avgR=(mins>0&&sCount>0)?Math.round(sCount/mins):0;
+
+  // Landscape
   eR.textContent=sRate;
   eR.className='rate-num'+(sRate===0?'':sRate<32?' active':' warn');
-  const ss=fmtSplit(curSpd);eSp.textContent=ss;eSp.className='split-num'+(ss==='–:––'?' dim':'');
-  const mins=elapsed/60;
-  eA.textContent=(mins>0&&sCount>0)?Math.round(sCount/mins):0;
+  eSp.textContent=ss;eSp.className='split-num'+(ss==='–:––'?' dim':'');
+  eA.textContent=avgR;
   eT.textContent=fmtT(elapsed);
   if(tDist>=1000){eD.textContent=(tDist/1000).toFixed(2);eDu.textContent=' km';}
   else{eD.textContent=Math.round(tDist);eDu.textContent=' m';}
   eDps.textContent=sCount>0?(tDist/sCount).toFixed(1):'0.0';
-  eSpd.textContent=(curSpd*3.6).toFixed(1);
-  eAvgSp.textContent=(tDist>10&&elapsed>5)?fmtSplit(tDist/elapsed):'–:––';
+  eCurSplit.textContent=ss;
+  const avgSp=(tDist>10&&elapsed>5)?fmtSplit(tDist/elapsed):'–:––';
+  eAvgSp.textContent=avgSp;
+
+  // Portrait
+  ePRate.textContent=sRate;
+  ePRate.className='p-rate'+(sRate===0?'':sRate<32?' active':' warn');
+  ePSplit.textContent=ss;ePSplit.className='p-split'+(ss==='–:––'?' dim':'');
+  ePTime.textContent=fmtT(elapsed);
+  if(tDist>=1000){ePDist.textContent=(tDist/1000).toFixed(2);ePDistU.textContent=' km';}
+  else{ePDist.textContent=Math.round(tDist);ePDistU.textContent=' m';}
+  ePAvgR.textContent=avgR;
+  ePAvgSplit.textContent=avgSp;
+}
+
+function setBtnState(){
+  const txt=app==='running'?'Stop':app==='paused'?'Weiter':'Start';
+  const cls='main-btn'+(app==='running'?' running':'');
+  eBtn.textContent=txt;eBtn.className=cls;
+  ePBtn.textContent=txt;ePBtn.className=cls;
 }
 
 /* ── Stroke ── */
@@ -879,7 +541,6 @@ function onMot(e){
   let mag=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2);
   if(!e.acceleration)mag=Math.abs(mag-9.81);
   smoothed=.3*mag+.7*smoothed;
-  // record raw mag for force curve (unsmoothed feels more like a real force curve)
   forceBuf[forceBufIdx%FORCE_BUF]=mag;
   forceBufIdx++;
   const now=Date.now();
@@ -938,8 +599,8 @@ function updSt(){
   }
 }
 
-/* ── Main button ── */
-eBtn.addEventListener('click',async()=>{
+/* ── Run toggle ── */
+async function toggleRun(){
   if(app==='idle'||app==='paused'){
     if(!sOk){
       if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
@@ -950,27 +611,68 @@ eBtn.addEventListener('click',async()=>{
     if(app==='idle'){runStart=Date.now();pauseAccum=0;}
     else{pauseAccum=elapsed;runStart=Date.now();}
     app='running';gpsOn();tickOn();wlOn();
-    eBtn.textContent='Stop';eBtn.className='main-btn running';updSt();
   }else{
     app='paused';elapsed=pauseAccum+Math.floor((Date.now()-runStart)/1000);
     gpsOff();tickOff();wlOff();
-    eBtn.textContent='Weiter';eBtn.className='main-btn';updSt();ui();
   }
-});
+  setBtnState();updSt();ui();
+}
 
 /* ── Reset ── */
-$('rst').addEventListener('click',()=>{
-  app='idle';sRate=0;sCount=0;tDist=0;elapsed=0;curSpd=0;paceBoatDist=0;
+function doReset(){
+  app='idle';sRate=0;sCount=0;tDist=0;elapsed=0;curSpd=0;
   runStart=null;pauseAccum=0;
   smoothed=0;isAbove=false;lastStrokeT=0;recent=[];
   lastGps=null;gpsGot=false;gHist=[];tPts=[];
   gpsOff();tickOff();wlOff();clearTimeout(decayId);
   if(tLine)tLine.setLatLngs([]);
-  eBtn.textContent='Start';eBtn.className='main-btn';
-  eSFill.style.width='0';updSt();ui();
-});
+  eSFill.style.width='0';setBtnState();updSt();ui();
+}
+
+eBtn.addEventListener('click',toggleRun);
+ePBtn.addEventListener('click',toggleRun);
+$('rst').addEventListener('click',doReset);
+$('pRst').addEventListener('click',doReset);
 
 ui();
+
+/* ── Dev mode (?dev in URL) ── */
+if(location.search.includes('dev')){
+  sOk=true;
+  let autoId=null;
+  const bar=document.createElement('div');
+  bar.style.cssText='position:fixed;bottom:1rem;right:1rem;z-index:99999;display:flex;flex-direction:column;gap:.4rem;align-items:flex-end';
+  bar.innerHTML=`
+    <div style="background:#1f1f1f;border:1px solid #333;padding:.5rem .7rem;font-size:.55rem;letter-spacing:.1em;color:#888;text-transform:uppercase">Dev Mode</div>
+    <button id="dStroke" style="background:#1f1f1f;border:1px solid #444;color:#fff;font-family:var(--font);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:.45rem .8rem;cursor:pointer">Stroke</button>
+    <div style="display:flex;gap:.4rem;align-items:center">
+      <button id="dAuto" style="background:#1f1f1f;border:1px solid #444;color:#fff;font-family:var(--font);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:.45rem .8rem;cursor:pointer">Auto: Off</button>
+      <input id="dSpm" type="number" value="20" min="10" max="50" style="width:3rem;background:#111;border:1px solid #333;color:#fff;font-family:var(--font);font-size:.65rem;text-align:center;padding:.3rem">
+      <span style="font-size:.5rem;color:#666;letter-spacing:.08em">SPM</span>
+    </div>
+    <div style="display:flex;gap:.4rem;align-items:center">
+      <span style="font-size:.5rem;color:#666;letter-spacing:.08em;text-transform:uppercase">Speed</span>
+      <input id="dSpd" type="number" value="0" min="0" max="20" step="0.1" style="width:3.5rem;background:#111;border:1px solid #333;color:#fff;font-family:var(--font);font-size:.65rem;text-align:center;padding:.3rem">
+      <span style="font-size:.5rem;color:#666;letter-spacing:.08em">km/h</span>
+    </div>`;
+  document.body.appendChild(bar);
+
+  const dStroke=document.getElementById('dStroke');
+  const dAuto=document.getElementById('dAuto');
+  const dSpm=document.getElementById('dSpm');
+  const dSpd=document.getElementById('dSpd');
+
+  dStroke.addEventListener('click',()=>stroke(Date.now()));
+
+  const ms=()=>60000/parseFloat(dSpm.value||20);
+  dSpm.addEventListener('change',()=>{if(autoId){clearInterval(autoId);autoId=setInterval(()=>stroke(Date.now()),ms());}});
+  dAuto.addEventListener('click',()=>{
+    if(autoId){clearInterval(autoId);autoId=null;dAuto.textContent='Auto: Off';dAuto.style.borderColor='#444';}
+    else{autoId=setInterval(()=>stroke(Date.now()),ms());dAuto.textContent='Auto: On';dAuto.style.borderColor='var(--red)';}
+  });
+
+  dSpd.addEventListener('input',()=>{curSpd=parseFloat(dSpd.value||0)/3.6;ui();});
+}
 </script>
 
 </body>
