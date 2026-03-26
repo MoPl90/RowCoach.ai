@@ -68,12 +68,26 @@ html,body{
   animation:blink 1.4s ease-in-out infinite;
 }
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.lang-btn{
+.lang-btn,.theme-btn{
   background:none;border:none;color:var(--g4);font-family:var(--font);
   font-size:.5rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;
   cursor:pointer;padding:0;
 }
-.lang-btn:active{color:var(--white)}
+.lang-btn:active,.theme-btn:active{color:var(--white)}
+
+/* ── light mode ── */
+html.light{
+  --black: #f0f0f0;
+  --white: #111111;
+  --g1:   #e0e0e0;
+  --g2:   #cccccc;
+  --g3:   #999999;
+  --g4:   #555555;
+  --g5:   #333333;
+  --red:  #cc0000;
+}
+html.light .flash{background:#000}
+html.light .leaflet-container{background:#f0f0f0!important}
 
 /* ── cockpit (landscape) ── */
 .cockpit{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.35fr 1fr}
@@ -119,7 +133,7 @@ html,body{
 }
 .split-lbl{font-size:.45rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--g4)}
 .split-num{font-size:min(2.6rem,8vw);font-weight:300;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:var(--white)}
-.split-num.dim{color:var(--g3)}
+.split-num.dim{color:var(--g4)}
 
 .ctrl-block{padding:.5rem .6rem;display:flex;flex-direction:column;gap:.3rem}
 .sr-row{
@@ -186,7 +200,7 @@ html,body{
 .p-rate.warn{color:var(--red)}
 .p-unit{font-size:.5rem;font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:var(--g4);margin-top:.4rem}
 .p-split{font-size:min(3.2rem,13vw);font-weight:300;font-variant-numeric:tabular-nums;color:var(--white);letter-spacing:-.01em;margin-top:.5rem;line-height:1}
-.p-split.dim{color:var(--g3)}
+.p-split.dim{color:var(--g4)}
 .p-split-lbl{font-size:.4rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--g4);margin-top:.2rem}
 .p-grid{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0;margin:1rem;gap:.6rem;align-content:center}
 .p-cell{
@@ -226,7 +240,10 @@ html,body{
   <div class="hdr">
     <span class="hdr-t" data-i18n="appName">Schlagzahlmesser</span>
     <span class="hdr-s" id="hdrStatus"></span>
-    <button class="lang-btn" id="langBtn">EN</button>
+    <div style="display:flex;gap:.6rem;align-items:baseline">
+      <button class="theme-btn" id="themeBtn">Auto</button>
+      <button class="lang-btn" id="langBtn">EN</button>
+    </div>
   </div>
 
   <!-- Landscape: three-panel cockpit -->
@@ -320,6 +337,23 @@ html,body{
 </div>
 
 <script>
+/* ── Theme ── */
+const TILES={
+  dark:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  light:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+};
+let theme=localStorage.getItem('theme')||'auto';
+const sysDark=window.matchMedia('(prefers-color-scheme: dark)');
+function resolvedTheme(){return theme==='auto'?(sysDark.matches?'dark':'light'):theme;}
+function applyTheme(){
+  const r=resolvedTheme();
+  document.documentElement.classList.toggle('light',r==='light');
+  const labels={auto:'Auto',light:'Dark',dark:'Light'};
+  $('themeBtn').textContent=labels[theme];
+  if(map&&tLayer){map.removeLayer(tLayer);tLayer=L.tileLayer(TILES[r],{maxZoom:19}).addTo(map);}
+}
+sysDark.addEventListener('change',()=>{if(theme==='auto')applyTheme();});
+
 /* ── i18n ── */
 const TR={
   de:{
@@ -394,7 +428,7 @@ let gpsId=null, lastGps=null, gpsGot=false;
 let tickId=null, decayId=null, wakeLock=null;
 let lastVis=0, curSpd=0;
 let gHist=[], tPts=[];
-let map=null, tLine=null, pMark=null, mapOk=false;
+let map=null, tLine=null, pMark=null, mapOk=false, tLayer=null;
 let rightMode='stats';
 const FORCE_BUF=300;
 let forceBuf=new Float32Array(FORCE_BUF);
@@ -416,6 +450,13 @@ const ePDist=$('pDist'),ePDistU=$('pDistU'),ePAvgR=$('pAvgR'),ePAvgSplit=$('pAvg
 
 $('ss').addEventListener('input',e=>{sens=parseFloat(e.target.value);eSvl.textContent=e.target.value});
 document.addEventListener('dblclick',e=>e.preventDefault());
+
+/* ── Theme toggle ── */
+$('themeBtn').addEventListener('click',()=>{
+  theme={auto:'light',light:'dark',dark:'auto'}[theme];
+  localStorage.setItem('theme',theme);
+  applyTheme();
+});
 
 /* ── Lang toggle ── */
 $('langBtn').addEventListener('click',()=>{
@@ -539,7 +580,7 @@ function initMap(lat,lon){
   map=L.map('map',{zoomControl:false,attributionControl:false,dragging:false,
     scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false,boxZoom:false,keyboard:false,tap:false})
     .setView([lat,lon],16);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
+  tLayer=L.tileLayer(TILES[theme],{maxZoom:19}).addTo(map);
   tLine=L.polyline([],{color:'#ffffff',weight:2,opacity:.7}).addTo(map);
   pMark=L.circleMarker([lat,lon],{radius:4,color:'#fff',fillColor:'#fff',fillOpacity:1,weight:0}).addTo(map);
   setTimeout(()=>map.invalidateSize(),200);
@@ -713,6 +754,7 @@ ePBtn.addEventListener('click',toggleRun);
 $('rst').addEventListener('click',doReset);
 $('pRst').addEventListener('click',doReset);
 
+applyTheme();
 applyLang();
 ui();
 
