@@ -9,8 +9,8 @@
 <title>Schlagzahl</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous"/>
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WPvE=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <style>
 :root {
   --black:  #000000;
@@ -641,15 +641,16 @@ function hav(a1,o1,a2,o2){
 function onPos(p){
   if(app!=='running')return;
   const{latitude:lat,longitude:lon,accuracy:acc,speed:gs}=p.coords;
-  if(acc>30)return;
+  updMap(lat,lon);
+  if(!gpsGot){gpsGot=true;updSt();}
+  if(acc>30){ui();return;}
   if(lastGps){const d=hav(lastGps.lat,lastGps.lon,lat,lon);if(d>1.5&&d<100)tDist+=d;}
-  lastGps={lat,lon};tPts.push([lat,lon]);updMap(lat,lon);
+  lastGps={lat,lon};tPts.push([lat,lon]);
   const now=Date.now();
   gHist.push({t:now,d:tDist});
   while(gHist.length>1&&now-gHist[0].t>12000)gHist.shift();
   if(gHist.length>=2){const f=gHist[0],l=gHist[gHist.length-1],dt=(l.t-f.t)/1000;if(dt>2)curSpd=Math.max(0,(l.d-f.d)/dt);}
   if(gs!=null&&gs>.3)curSpd=curSpd*.6+gs*.4;
-  if(!gpsGot){gpsGot=true;updSt();}
   ui();
 }
 function gpsOn(){if(!navigator.geolocation||gpsId!==null)return;gpsId=navigator.geolocation.watchPosition(onPos,()=>{},{enableHighAccuracy:true,maximumAge:2000,timeout:10000});}
