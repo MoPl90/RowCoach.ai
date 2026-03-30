@@ -38,7 +38,7 @@ export default function PortraitLayout({ sRate, split, elapsed, tDist, avgRate, 
       </div>
       <div className="p-ctrl">
         <button className={btnClass} onClick={onToggle}>{btnText}</button>
-        <button className="rst-btn" onClick={onReset}>{t('reset')}</button>
+        <button className="rst-btn" onClick={onReset} disabled={app === 'running'}>{t('reset')}</button>
       </div>
     </div>
   );

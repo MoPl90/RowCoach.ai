@@ -22,7 +22,7 @@ export default function ControlBlock({ app, onToggle, onReset, onSensChange, sOn
         <span className="sr-val">{sensVal}</span>
       </div>
       <button className={btnClass} onClick={onToggle}>{btnText}</button>
-      <button className="rst-btn" onClick={onReset}>{t('reset')}</button>
+      <button className="rst-btn" onClick={onReset} disabled={app === 'running'}>{t('reset')}</button>
     </div>
   );
 }
