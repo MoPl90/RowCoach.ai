@@ -76,7 +76,7 @@ html.light .flash{background:#000}
 html.light .leaflet-container{background:#f0f0f0!important}
 
 /* ── cockpit (landscape) ── */
-.cockpit{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.35fr 1fr}
+.cockpit{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.35fr 1fr;grid-template-rows:1fr}
 .panel{border-right:1px solid var(--g2)}
 .panel:last-child{border-right:none}
 
@@ -215,7 +215,7 @@ html.light .leaflet-container{background:#f0f0f0!important}
 .p-split{font-size:min(3.2rem,13vw);font-weight:300;font-variant-numeric:tabular-nums;color:var(--white);letter-spacing:-.01em;margin-top:.5rem;line-height:1}
 .p-split.dim{color:var(--g4)}
 .p-split-lbl{font-size:.4rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--g4);margin-top:.2rem}
-.p-grid{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0;margin:1rem;gap:.6rem;align-content:center}
+.p-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;flex:1;min-height:0;margin:1rem;gap:.6rem}
 .p-cell{
   display:flex;flex-direction:column;justify-content:center;
   padding:.5rem .7rem;

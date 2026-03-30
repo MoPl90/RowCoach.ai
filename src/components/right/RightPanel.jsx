@@ -4,7 +4,8 @@ import StatsGrid from './StatsGrid';
 import ForceCanvas from './ForceCanvas';
 
 export default function RightPanel({
-  time, dist, distUnit, avgSplit, avgRate, mps, curSplit,
+  time, dist, distUnit,
+  curSplit, avgSplit, curRate, avgRate, curMps, avgMps,
   forceBuf, forceBufIdx, forceMax, recentStrokeTimes, sOk,
 }) {
   const { t } = useLang();
@@ -18,8 +19,10 @@ export default function RightPanel({
     <div className="panel panel-right">
       {mode === 'stats' ? (
         <StatsGrid
-          time={time} dist={dist} distUnit={distUnit} avgSplit={avgSplit}
-          avgRate={avgRate} mps={mps} curSplit={curSplit}
+          time={time} dist={dist} distUnit={distUnit}
+          curSplit={curSplit} avgSplit={avgSplit}
+          curRate={curRate} avgRate={avgRate}
+          curMps={curMps} avgMps={avgMps}
           onToggleMode={toggleMode}
         />
       ) : (

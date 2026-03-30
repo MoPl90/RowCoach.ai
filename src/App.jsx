@@ -45,7 +45,8 @@ export default function App() {
   const avgSplit = tDist > 10 && elapsed > 5 ? fmtSplit(tDist / elapsed) : '–:––';
   const distVal = tDist >= 1000 ? (tDist / 1000).toFixed(2) : String(Math.round(tDist));
   const distUnit = tDist >= 1000 ? ' km' : ' m';
-  const mps = sCount > 0 ? (tDist / sCount).toFixed(1) : '0.0';
+  const avgMps = sCount > 0 ? (tDist / sCount).toFixed(1) : '0.0';
+  const curMps = sRate > 0 && curSpd > 0 ? (curSpd * 60 / sRate).toFixed(1) : '0.0';
 
   async function handleGrant() {
     await requestPermissions();
@@ -87,8 +88,9 @@ export default function App() {
           <RightPanel
             time={fmtT(elapsed)}
             dist={distVal} distUnit={distUnit}
-            avgSplit={avgSplit} avgRate={avgRate}
-            mps={mps} curSplit={split}
+            curSplit={split} avgSplit={avgSplit}
+            curRate={sRate} avgRate={avgRate}
+            curMps={curMps} avgMps={avgMps}
             forceBuf={forceBuf} forceBufIdx={forceBufIdx} forceMax={forceMax}
             recentStrokeTimes={recentStrokeTimes} sOk={sOk}
           />

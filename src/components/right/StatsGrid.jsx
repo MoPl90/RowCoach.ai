@@ -8,12 +8,14 @@ const LAYOUT_KEY = 'statsLayout';
 const ALL_TILES = [
   { key: 'time',     lbl: 'time' },
   { key: 'dist',     lbl: 'dist' },
-  { key: 'avgSplit', lbl: 'avgSplit' },
+  { key: 'curRate',  lbl: 'curRate' },
   { key: 'avgRate',  lbl: 'avgRate' },
-  { key: 'mps',      lbl: 'mps' },
   { key: 'curSplit', lbl: 'splitLbl' },
+  { key: 'avgSplit', lbl: 'avgSplit' },
+  { key: 'curMps',   lbl: 'curMps' },
+  { key: 'avgMps',   lbl: 'avgMps' },
 ];
-const DEFAULT_KEYS = ALL_TILES.map(t => t.key);
+const DEFAULT_KEYS = ['time', 'dist', 'curRate', 'avgRate', 'curSplit', 'avgSplit'];
 const DEFAULT_LAYOUT = { cols: 2, rows: 3 };
 
 const LAYOUTS = [
@@ -49,7 +51,7 @@ function applyBorderClasses(items, cols) {
   });
 }
 
-export default function StatsGrid({ time, dist, distUnit, avgSplit, avgRate, mps, curSplit, onToggleMode }) {
+export default function StatsGrid({ time, dist, distUnit, curSplit, avgSplit, curRate, avgRate, curMps, avgMps, onToggleMode }) {
   const { t } = useLang();
   const listRef = useRef(null);
   const trashRef = useRef(null);
@@ -64,12 +66,14 @@ export default function StatsGrid({ time, dist, distUnit, avgSplit, avgRate, mps
   const [showAddPanel, setShowAddPanel] = useState(false);
 
   const stats = {
-    time:     { val: time, lbl: t('time') },
+    time:     { val: time,    lbl: t('time') },
     dist:     { val: <>{dist}<span className="unit">{distUnit}</span></>, lbl: t('dist') },
-    avgSplit: { val: avgSplit, lbl: t('avgSplit') },
+    curRate:  { val: curRate, lbl: t('curRate') },
     avgRate:  { val: avgRate, lbl: t('avgRate') },
-    mps:      { val: <>{mps}<span className="unit"> m</span></>, lbl: t('mps') },
     curSplit: { val: curSplit, lbl: t('splitLbl') },
+    avgSplit: { val: avgSplit, lbl: t('avgSplit') },
+    curMps:   { val: <>{curMps}<span className="unit"> m</span></>, lbl: t('curMps') },
+    avgMps:   { val: <>{avgMps}<span className="unit"> m</span></>, lbl: t('avgMps') },
   };
 
   const maxTiles = layout.cols * layout.rows;
