@@ -6,7 +6,8 @@ import ForceCanvas from './ForceCanvas';
 export default function RightPanel({
   time, dist, distUnit,
   curSplit, avgSplit, curRate, avgRate, curMps, avgMps,
-  forceBuf, forceBufIdx, forceMax, recentStrokeTimes, sOk,
+  currentStrokeSamples, prevStrokeSamples, strokePeak,
+  sOk,
 }) {
   const { t } = useLang();
   const [mode, setMode] = useState('stats');
@@ -32,8 +33,10 @@ export default function RightPanel({
             <span style={{ color: 'var(--g3)', fontSize: '.4rem', letterSpacing: '.05em' }}>{t('tap')}</span>
           </div>
           <ForceCanvas
-            forceBuf={forceBuf} forceBufIdx={forceBufIdx} forceMax={forceMax}
-            recentStrokeTimes={recentStrokeTimes} sOk={sOk}
+            currentStrokeSamples={currentStrokeSamples}
+            prevStrokeSamples={prevStrokeSamples}
+            strokePeak={strokePeak}
+            sOk={sOk}
           />
         </div>
       )}

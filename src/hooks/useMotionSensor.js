@@ -1,17 +1,17 @@
 import { useRef } from 'react';
 
-const FORCE_BUF = 300;
+const MAX_STROKE_SAMPLES = 600; // up to ~10s at 60Hz
 
 export function useMotionSensor({ onStroke, sensFillRef }) {
   const smoothed = useRef(0);
   const isAbove = useRef(false);
   const lastVis = useRef(0);
   const sOn = useRef(false);
-
-  const forceBuf = useRef(new Float32Array(FORCE_BUF));
-  const forceBufIdx = useRef(0);
-  const forceMax = useRef(1);
   const sensRef = useRef(3);
+
+  const currentStrokeSamples = useRef([]);
+  const prevStrokeSamples = useRef([]);
+  const strokePeak = useRef(1);
 
   function onMot(e) {
     const a = e.acceleration || e.accelerationIncludingGravity;
@@ -20,8 +20,11 @@ export function useMotionSensor({ onStroke, sensFillRef }) {
     if (!e.acceleration) mag = Math.abs(mag - 9.81);
 
     smoothed.current = 0.3 * mag + 0.7 * smoothed.current;
-    forceBuf.current[forceBufIdx.current % FORCE_BUF] = mag;
-    forceBufIdx.current++;
+
+    if (currentStrokeSamples.current.length < MAX_STROKE_SAMPLES) {
+      currentStrokeSamples.current.push(mag);
+    }
+    if (smoothed.current > strokePeak.current) strokePeak.current = smoothed.current;
 
     const now = Date.now();
     if (now - lastVis.current > 80) {
@@ -34,6 +37,11 @@ export function useMotionSensor({ onStroke, sensFillRef }) {
 
     if (!isAbove.current && smoothed.current > sensRef.current) {
       isAbove.current = true;
+      if (currentStrokeSamples.current.length > 10) {
+        prevStrokeSamples.current = currentStrokeSamples.current;
+        strokePeak.current = strokePeak.current * 0.998;
+      }
+      currentStrokeSamples.current = [];
       onStroke(now);
     } else if (isAbove.current && smoothed.current < sensRef.current * 0.4) {
       isAbove.current = false;
@@ -56,5 +64,5 @@ export function useMotionSensor({ onStroke, sensFillRef }) {
     sensRef.current = v;
   }
 
-  return { sensStart, sensStop, setSens, forceBuf, forceBufIdx, forceMax, sOn };
+  return { sensStart, sensStop, setSens, currentStrokeSamples, prevStrokeSamples, strokePeak, sOn };
 }

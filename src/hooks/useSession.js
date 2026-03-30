@@ -75,7 +75,7 @@ export function useSession({ mapRef, sensFillRef }) {
   }, []);
 
   // ── Motion sensor ──
-  const { sensStart, setSens, forceBuf, forceBufIdx, forceMax, sOn: sOnRef } = useMotionSensor({
+  const { sensStart, setSens, currentStrokeSamples, prevStrokeSamples, strokePeak, sOn: sOnRef } = useMotionSensor({
     onStroke: stroke,
     sensFillRef,
   });
@@ -214,8 +214,7 @@ export function useSession({ mapRef, sensFillRef }) {
     sOk, sOn, gpsPermOk, gpsGot,
     toggleRun, doReset, requestPermissions,
     setSens, setCurSpd,
-    forceBuf, forceBufIdx, forceMax,
-    recentStrokeTimes,
+    currentStrokeSamples, prevStrokeSamples, strokePeak,
     stroke,
     tPts,
   };

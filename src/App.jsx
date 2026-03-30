@@ -34,7 +34,7 @@ export default function App() {
     sOk, sOn, gpsPermOk, gpsGot,
     toggleRun, doReset, requestPermissions,
     setSens, setCurSpd,
-    forceBuf, forceBufIdx, forceMax, recentStrokeTimes,
+    currentStrokeSamples, prevStrokeSamples, strokePeak,
     stroke,
   } = useSession({ mapRef, sensFillRef });
 
@@ -91,8 +91,10 @@ export default function App() {
             curSplit={split} avgSplit={avgSplit}
             curRate={sRate} avgRate={avgRate}
             curMps={curMps} avgMps={avgMps}
-            forceBuf={forceBuf} forceBufIdx={forceBufIdx} forceMax={forceMax}
-            recentStrokeTimes={recentStrokeTimes} sOk={sOk}
+            currentStrokeSamples={currentStrokeSamples}
+            prevStrokeSamples={prevStrokeSamples}
+            strokePeak={strokePeak}
+            sOk={sOk}
           />
         </div>
 
