@@ -6,8 +6,10 @@ export default function PortraitLayout({ sRate, split, elapsed, tDist, avgRate, 
   const rateClass = 'p-rate' + (sRate === 0 ? '' : sRate < 32 ? ' active' : ' warn');
   const splitClass = 'p-split' + (split === '–:––' ? ' dim' : '');
 
-  const btnText = app === 'running' ? t('btnStop') : app === 'paused' ? t('btnResume') : t('btnStart');
-  const btnClass = 'main-btn' + (app === 'running' ? ' running' : '');
+  const isRunning = app === 'running';
+  const goText = app === 'paused' ? t('btnResume') : t('btnStart');
+  const dangerText = isRunning ? t('btnStop') : t('reset');
+  const dangerAction = isRunning ? onToggle : onReset;
 
   return (
     <div id="portrait">
@@ -37,8 +39,17 @@ export default function PortraitLayout({ sRate, split, elapsed, tDist, avgRate, 
         </div>
       </div>
       <div className="p-ctrl">
-        <button className={btnClass} onClick={onToggle}>{btnText}</button>
-        <button className="rst-btn" onClick={onReset} disabled={app === 'running'}>{t('reset')}</button>
+        <div className="ctrl-btns">
+          <button
+            className={`ctrl-btn go${isRunning ? ' hidden' : ''}`}
+            onClick={onToggle}
+          >{goText}</button>
+          <button
+            className={`ctrl-btn ${isRunning ? 'stop' : 'reset'}`}
+            onClick={dangerAction}
+            disabled={app === 'idle'}
+          >{dangerText}</button>
+        </div>
       </div>
     </div>
   );

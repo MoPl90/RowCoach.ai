@@ -5,8 +5,10 @@ export default function ControlBlock({ app, onToggle, onReset, onSensChange, sOn
   const { t } = useLang();
   const [sensVal, setSensVal] = useState(3);
 
-  const btnText = app === 'running' ? t('btnStop') : app === 'paused' ? t('btnResume') : t('btnStart');
-  const btnClass = 'main-btn' + (app === 'running' ? ' running' : '');
+  const isRunning = app === 'running';
+  const goText = app === 'paused' ? t('btnResume') : t('btnStart');
+  const dangerText = isRunning ? t('btnStop') : t('reset');
+  const dangerAction = isRunning ? onToggle : onReset;
 
   function handleSens(e) {
     const v = parseFloat(e.target.value);
@@ -21,8 +23,17 @@ export default function ControlBlock({ app, onToggle, onReset, onSensChange, sOn
         <input type="range" min="1" max="10" step=".5" value={sensVal} onChange={handleSens} />
         <span className="sr-val">{sensVal}</span>
       </div>
-      <button className={btnClass} onClick={onToggle}>{btnText}</button>
-      <button className="rst-btn" onClick={onReset} disabled={app === 'running'}>{t('reset')}</button>
+      <div className="ctrl-btns">
+        <button
+          className={`ctrl-btn go${isRunning ? ' hidden' : ''}`}
+          onClick={onToggle}
+        >{goText}</button>
+        <button
+          className={`ctrl-btn ${isRunning ? 'stop' : 'reset'}`}
+          onClick={dangerAction}
+          disabled={app === 'idle'}
+        >{dangerText}</button>
+      </div>
     </div>
   );
 }
