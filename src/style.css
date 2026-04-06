@@ -76,12 +76,20 @@ html.light .flash{background:#000}
 html.light .leaflet-container{background:#f0f0f0!important}
 
 /* ── cockpit (landscape) ── */
-.cockpit{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.35fr 1fr;grid-template-rows:1fr}
+.cockpit{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.35fr 1fr;grid-template-rows:1fr;transition:grid-template-columns .35s cubic-bezier(.4,0,.2,1)}
+.cockpit.map-hidden{grid-template-columns:1.4rem 1.35fr 1fr}
 .panel{border-right:1px solid var(--g2)}
 .panel:last-child{border-right:none}
 
 /* LEFT: map */
 .panel-left{position:relative;overflow:hidden}
+.map-restore{
+  position:absolute;inset:0;background:var(--g1);border:none;border-right:1px solid var(--g2);
+  color:var(--g4);cursor:pointer;display:none;align-items:center;justify-content:center;
+  font-size:.9rem;z-index:3;
+}
+.map-restore:active{color:var(--white);background:var(--g2)}
+.panel-left.map-hidden .map-restore{display:flex}
 #map{width:100%;height:100%}
 .map-msg{
   position:absolute;inset:0;display:flex;flex-direction:column;

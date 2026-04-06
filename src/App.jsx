@@ -25,6 +25,7 @@ export default function App() {
   const [permDismissed, setPermDismissed] = useState(() =>
     localStorage.getItem('permDismissed') === '1'
   );
+  const [mapHidden, setMapHidden] = useState(false);
   const mapRef = useRef(null);
   const sensFillRef = useRef(null);
   const isDevMode = useDevMode();
@@ -78,8 +79,13 @@ export default function App() {
         <Header app={app} sOk={sOk} gpsPermOk={gpsPermOk} gpsGot={gpsGot} />
 
         {/* Landscape cockpit */}
-        <div className="cockpit">
-          <MapPanel ref={mapRef} />
+        <div className={`cockpit${mapHidden ? ' map-hidden' : ''}`}>
+          <MapPanel
+            ref={mapRef}
+            hidden={mapHidden}
+            onHide={() => setMapHidden(true)}
+            onShow={() => setMapHidden(false)}
+          />
           <CenterPanel
             sRate={sRate} sOn={sOn} split={split}
             app={app} onToggle={toggleRun} onReset={handleReset}

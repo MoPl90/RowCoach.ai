@@ -3,11 +3,13 @@ import L from 'leaflet';
 import { useLang } from '../../context/LangContext';
 import { useTheme, TILES } from '../../context/ThemeContext';
 
-const MapPanel = forwardRef(function MapPanel(_props, ref) {
+const MapPanel = forwardRef(function MapPanel({ hidden, onHide, onShow }, ref) {
   const { t } = useLang();
   const { resolvedTheme } = useTheme();
   const mapContainerRef = useRef(null);
   const [showMsg, setShowMsg] = useState(true);
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
 
   const map = useRef(null);
   const tLine = useRef(null);
@@ -62,11 +64,38 @@ const MapPanel = forwardRef(function MapPanel(_props, ref) {
     map.current.removeLayer(old);
   }, [resolvedTheme]);
 
+  // Invalidate map size after transition when restored
+  useEffect(() => {
+    if (!hidden && mapOk.current && map.current) {
+      setTimeout(() => map.current?.invalidateSize(), 380);
+    }
+  }, [hidden]);
+
+  function handleTouchStart(e) {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }
+
+  function handleTouchEnd(e) {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    touchStartX.current = null;
+    if (!hidden && Math.abs(dx) > Math.abs(dy) && dx < -60) {
+      onHide?.();
+    }
+  }
+
   const msgLines = t('mapMsg').split('\n');
 
   return (
-    <div className="panel panel-left">
-      {showMsg && (
+    <div
+      className={`panel panel-left${hidden ? ' map-hidden' : ''}`}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      <button className="map-restore" onClick={onShow} aria-label="Show map">&#8250;</button>
+      {showMsg && !hidden && (
         <div className="map-msg">
           <div className="map-msg-txt">{msgLines[0]}<br />{msgLines[1]}</div>
         </div>
