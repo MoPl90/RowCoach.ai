@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from 'react';
 
 const TR = {
   de: {
-    appName: 'Schlagzahlmesser',
+    appName: 'Row Pacer',
     permBody: 'Die App benötigt Zugriff auf den Bewegungssensor zur Schlagzählung sowie GPS für Strecke und Tempo.',
     permBtn: 'Berechtigungen erteilen',
     permSkip: 'Überspringen',
@@ -29,7 +29,7 @@ const TR = {
     noSensor: 'Sensor nicht aktiv',
   },
   en: {
-    appName: 'Stroke Rate',
+    appName: 'Row Pacer',
     permBody: 'The app needs access to the motion sensor for stroke counting and GPS for distance and pace.',
     permBtn: 'Grant Permissions',
     permSkip: 'Skip',
