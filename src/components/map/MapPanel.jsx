@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import L from 'leaflet';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 import { useTheme, TILES } from '../../context/ThemeContext';
 
@@ -94,8 +95,8 @@ const MapPanel = forwardRef(function MapPanel({ hidden, onHide, onShow }, ref) {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <button className="map-restore" onClick={onShow} aria-label="Show map">&#8250;</button>
-      <button className="map-collapse" onClick={onHide} aria-label="Hide map">&#8249;</button>
+      <button className="map-restore" onClick={onShow} aria-label="Show map"><ChevronRight size={16} /></button>
+      <button className="map-collapse" onClick={onHide} aria-label="Hide map"><ChevronLeft size={16} /></button>
       {showMsg && !hidden && (
         <div className="map-msg">
           <div className="map-msg-txt">{msgLines[0]}<br />{msgLines[1]}</div>

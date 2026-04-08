@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { RotateCcw } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 
 export default function ControlBlock({ app, onToggle, onReset, onSensChange, sOn }) {
@@ -32,7 +33,7 @@ export default function ControlBlock({ app, onToggle, onReset, onSensChange, sOn
           className={`ctrl-btn ${isRunning ? 'stop' : 'reset'}`}
           onClick={dangerAction}
           disabled={app === 'idle'}
-        >{dangerText}</button>
+        >{isRunning ? dangerText : <><RotateCcw size={13} strokeWidth={2.5} /> {dangerText}</>}</button>
       </div>
     </div>
   );

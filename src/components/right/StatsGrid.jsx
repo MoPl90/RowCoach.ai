@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import Sortable from 'sortablejs';
+import { Plus, Settings, Trash2 } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 
 const STORAGE_KEY = 'statsOrder';
@@ -218,12 +219,12 @@ export default function StatsGrid({ time, dist, distUnit, curSplit, avgSplit, cu
             className="icon-btn"
             onPointerDown={e => e.stopPropagation()}
             onClick={() => { setShowAddPanel(v => !v); setShowSettings(false); }}
-          >+</button>
+          ><Plus size={14} strokeWidth={2.5} /></button>
           <button
             className="icon-btn"
             onPointerDown={e => e.stopPropagation()}
             onClick={() => { setShowSettings(v => !v); setShowAddPanel(false); }}
-          >⚙</button>
+          ><Settings size={14} strokeWidth={2} /></button>
         </div>
       </div>
 
@@ -296,7 +297,7 @@ export default function StatsGrid({ time, dist, distUnit, curSplit, avgSplit, cu
       {/* Drag-to-delete trash zone */}
       {isDragging && (
         <div ref={trashRef} className={`stat-trash-zone${overTrash ? ' over' : ''}`}>
-          🗑
+          <Trash2 size={22} strokeWidth={1.8} />
         </div>
       )}
     </div>

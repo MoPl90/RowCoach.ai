@@ -1,3 +1,4 @@
+import { RotateCcw } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 
 export default function PortraitLayout({ sRate, split, elapsed, tDist, avgRate, avgSplit, app, onToggle, onReset }) {
@@ -48,7 +49,7 @@ export default function PortraitLayout({ sRate, split, elapsed, tDist, avgRate, 
             className={`ctrl-btn ${isRunning ? 'stop' : 'reset'}`}
             onClick={dangerAction}
             disabled={app === 'idle'}
-          >{dangerText}</button>
+          >{isRunning ? dangerText : <><RotateCcw size={13} strokeWidth={2.5} /> {dangerText}</>}</button>
         </div>
       </div>
     </div>
