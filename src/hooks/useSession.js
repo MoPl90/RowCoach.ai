@@ -2,8 +2,9 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useMotionSensor } from './useMotionSensor';
 import { useGPS } from './useGPS';
 import { useWakeLock } from './useWakeLock';
+import { useRecorder } from './useRecorder';
 
-export function useSession({ mapRef, sensFillRef }) {
+export function useSession({ mapRef, sensFillRef, record }) {
   // ── State ──
   const [app, setApp] = useState('idle');
   const [sRate, setSRate] = useState(0);
@@ -15,6 +16,7 @@ export function useSession({ mapRef, sensFillRef }) {
   const [sOn, setSOn] = useState(false);
   const [gpsPermOk, setGpsPermOk] = useState(false);
   const [gpsGot, setGpsGot] = useState(false);
+  const [hasRecording, setHasRecording] = useState(false);
 
   // ── Refs ──
   const runStart = useRef(null);
@@ -25,6 +27,9 @@ export function useSession({ mapRef, sensFillRef }) {
   const recentStrokeTimes = useRef([]);
   const appRef = useRef('idle');
   const tDistRef = useRef(0);
+  const sensVal = useRef(3);
+
+  const recorder = useRecorder();
 
   function updateApp(val) {
     appRef.current = val;
@@ -60,6 +65,7 @@ export function useSession({ mapRef, sensFillRef }) {
     if (recentStrokeTimes.current.length > 6) recentStrokeTimes.current.shift();
 
     setSCount(c => c + 1);
+    recorder.stroke(now);
 
     const flash = document.getElementById('flash');
     if (flash) { flash.classList.add('on'); setTimeout(() => flash.classList.remove('on'), 80); }
@@ -75,10 +81,19 @@ export function useSession({ mapRef, sensFillRef }) {
   }, []);
 
   // ── Motion sensor ──
-  const { sensStart, setSens, currentStrokeSamples, prevStrokeSamples, strokePeak, sOn: sOnRef } = useMotionSensor({
+  const { sensStart, setSens: setSensorSens, currentStrokeSamples, prevStrokeSamples, strokePeak, sOn: sOnRef } = useMotionSensor({
     onStroke: stroke,
+    onSample: (x, y, z, withGravity) => {
+      if (appRef.current === 'running') recorder.motion(x, y, z, withGravity);
+    },
     sensFillRef,
   });
+
+  function setSens(v) {
+    sensVal.current = v;
+    setSensorSens(v);
+    if (appRef.current !== 'idle') recorder.event('sens', v);
+  }
 
   function activateSensor(hasPerm) {
     if (sOnRef.current) return;
@@ -106,6 +121,7 @@ export function useSession({ mapRef, sensFillRef }) {
     onDistUpdate,
     onSpdUpdate,
     onGpsGot,
+    onRaw: recorder.gps,
     mapRef,
   });
 
@@ -146,7 +162,12 @@ export function useSession({ mapRef, sensFillRef }) {
       if (current === 'idle') {
         runStart.current = Date.now();
         pauseAccum.current = 0;
+        if (record) {
+          recorder.begin({ sens: sensVal.current, motionPermission: hasPerm });
+          setHasRecording(true);
+        }
       } else {
+        recorder.event('resume');
         pauseAccum.current = elapsed;
         runStart.current = Date.now();
         // Drop pre-pause strokes so the pause gap doesn't drag down the rate
@@ -161,6 +182,7 @@ export function useSession({ mapRef, sensFillRef }) {
     } else {
       setElapsed(pauseAccum.current + Math.floor((Date.now() - runStart.current) / 1000));
       updateApp('paused');
+      recorder.event('pause');
       gpsOff();
       tickOff();
       wlOff();
@@ -216,6 +238,7 @@ export function useSession({ mapRef, sensFillRef }) {
     app, sRate, sCount, tDist, elapsed, curSpd,
     sOk, sOn, gpsPermOk, gpsGot,
     toggleRun, doReset, requestPermissions,
+    hasRecording, downloadRecording: recorder.download,
     setSens, setCurSpd,
     currentStrokeSamples, prevStrokeSamples, strokePeak,
     stroke,

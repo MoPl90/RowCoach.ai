@@ -7,7 +7,7 @@ function haversine(a1, o1, a2, o2) {
   return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
 }
 
-export function useGPS({ onDistUpdate, onSpdUpdate, onGpsGot, mapRef }) {
+export function useGPS({ onDistUpdate, onSpdUpdate, onGpsGot, onRaw, mapRef }) {
   const gpsId = useRef(null);
   const lastGps = useRef(null);
   // gHist stores {t, d} where d is cumulative distance at that point
@@ -22,6 +22,7 @@ export function useGPS({ onDistUpdate, onSpdUpdate, onGpsGot, mapRef }) {
 
   function onPos(p) {
     const { latitude: lat, longitude: lon, accuracy: acc, speed: gs } = p.coords;
+    onRaw?.(lat, lon, acc, gs);
 
     mapRef.current?.updMap(lat, lon);
     onGpsGot();

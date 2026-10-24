@@ -34,10 +34,11 @@ export default function App() {
     app, sRate, sCount, tDist, elapsed, curSpd,
     sOk, sOn, gpsPermOk, gpsGot,
     toggleRun, doReset, requestPermissions,
+    hasRecording, downloadRecording,
     setSens, setCurSpd,
     currentStrokeSamples, prevStrokeSamples, strokePeak,
     stroke,
-  } = useSession({ mapRef, sensFillRef });
+  } = useSession({ mapRef, sensFillRef, record: isDevMode });
 
   // Derived display values
   const split = fmtSplit(curSpd);
@@ -115,7 +116,10 @@ export default function App() {
       </div>
 
       {isDevMode && (
-        <DevOverlay stroke={stroke} setCurSpd={setCurSpd} />
+        <DevOverlay
+          stroke={stroke} setCurSpd={setCurSpd}
+          canExport={hasRecording && app !== 'running'} onExport={downloadRecording}
+        />
       )}
     </>
   );

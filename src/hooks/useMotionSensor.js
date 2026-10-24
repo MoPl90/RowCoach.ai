@@ -2,7 +2,7 @@ import { useRef } from 'react';
 
 const MAX_STROKE_SAMPLES = 600; // up to ~10s at 60Hz
 
-export function useMotionSensor({ onStroke, sensFillRef }) {
+export function useMotionSensor({ onStroke, onSample, sensFillRef }) {
   const smoothed = useRef(0);
   const isAbove = useRef(false);
   const lastVis = useRef(0);
@@ -16,6 +16,7 @@ export function useMotionSensor({ onStroke, sensFillRef }) {
   function onMot(e) {
     const a = e.acceleration || e.accelerationIncludingGravity;
     if (!a) return;
+    onSample?.(a.x, a.y, a.z, !e.acceleration);
     let mag = Math.sqrt((a.x || 0) ** 2 + (a.y || 0) ** 2 + (a.z || 0) ** 2);
     if (!e.acceleration) mag = Math.abs(mag - 9.81);
 

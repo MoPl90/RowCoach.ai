@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-export default function DevOverlay({ stroke, setCurSpd }) {
+export default function DevOverlay({ stroke, setCurSpd, canExport, onExport }) {
   const [autoOn, setAutoOn] = useState(false);
   const [spm, setSpm] = useState(20);
   const autoId = useRef(null);
@@ -50,6 +50,7 @@ export default function DevOverlay({ stroke, setCurSpd }) {
       display: 'flex', flexDirection: 'column', gap: '.4rem', alignItems: 'flex-end',
     }}>
       <div style={{ background: '#1f1f1f', border: '1px solid #333', padding: '.5rem .7rem', fontSize: '.55rem', letterSpacing: '.1em', color: '#888', textTransform: 'uppercase' }}>Dev Mode</div>
+      {canExport && <button style={btnStyle} onClick={onExport}>Export</button>}
       <button style={btnStyle} onClick={handleStroke}>Stroke</button>
       <div style={{ display: 'flex', gap: '.4rem', alignItems: 'center' }}>
         <button
