@@ -149,6 +149,9 @@ export function useSession({ mapRef, sensFillRef }) {
       } else {
         pauseAccum.current = elapsed;
         runStart.current = Date.now();
+        // Drop pre-pause strokes so the pause gap doesn't drag down the rate
+        recent.current = [];
+        recentStrokeTimes.current = [];
       }
 
       updateApp('running');
