@@ -1,10 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
-export const TILES = {
-  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-};
-
 const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
 
 const ThemeContext = createContext(null);

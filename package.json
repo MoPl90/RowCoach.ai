@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "leaflet": "^1.9.4",
+    "maplibre-gl": "^6.15.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "sortablejs": "^1.15.7"

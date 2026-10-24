@@ -75,7 +75,6 @@ html.light{
   --green:#16a34a;
 }
 html.light .flash{background:#000}
-html.light .leaflet-container{background:#f0f0f0!important}
 
 /* ── cockpit (landscape) ── */
 .cockpit{flex:1;min-height:300px;display:grid;grid-template-columns:1fr 1.35fr 1fr;grid-template-rows:1fr;transition:grid-template-columns .35s cubic-bezier(.4,0,.2,1)}
@@ -210,8 +209,11 @@ html.light .leaflet-container{background:#f0f0f0!important}
 .stat-val .unit{font-size:.6em;font-weight:400;color:var(--g4)}
 .stat-lbl{font-family:var(--fontb);font-size:.45rem;font-weight:400;letter-spacing:.06em;text-transform:uppercase;color:var(--g4);margin-top:.05rem}
 .panel-right{position:relative;overflow:hidden;cursor:pointer}
-.leaflet-container{background:#000!important}
-.leaflet-control-attribution{display:none!important}
+.maplibregl-map{background:#141414}
+html.light .maplibregl-map{background:#f0f0f0}
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib{font-size:9px;line-height:1.4;padding:0 4px;margin:0;background:rgba(0,0,0,.45);color:var(--g4)}
+.maplibregl-ctrl-attrib a{color:inherit}
+html.light .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib{background:rgba(255,255,255,.6)}
 
 /* ── portrait layout ── */
 #portrait{display:none;flex-direction:column;flex:1;min-height:300px}
