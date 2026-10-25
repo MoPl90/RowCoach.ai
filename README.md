@@ -86,13 +86,13 @@ The domain `row-pacer.app` is registered and managed through Cloudflare.
 
 **DNS records** (set Proxy status to **DNS only** — gray cloud):
 
-| Type  | Name | Value               |
-|-------|------|---------------------|
-| A     | `@`  | `185.199.108.153`   |
-| A     | `@`  | `185.199.109.153`   |
-| A     | `@`  | `185.199.110.153`   |
-| A     | `@`  | `185.199.111.153`   |
-| CNAME | `www`| `mopl90.github.io`  |
+| Type  | Name | Value               | Proxy    |
+|-------|------|---------------------|----------|
+| A     | `@`  | `185.199.108.153`   | DNS only |
+| A     | `@`  | `185.199.109.153`   | DNS only |
+| A     | `@`  | `185.199.110.153`   | DNS only |
+| A     | `@`  | `185.199.111.153`   | DNS only |
+| CNAME | `www`| `mopl90.github.io`  | DNS only |
 
 > Proxy must be **DNS only** (gray cloud) on all records. With Cloudflare's orange-cloud proxy, GitHub Pages can't issue a certificate for the domain or verify it, and the Cloudflare → GitHub hop isn't verified HTTPS.
 
