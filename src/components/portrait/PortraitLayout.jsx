@@ -1,6 +1,6 @@
 import { useLang } from '../../context/LangContext';
 
-export default function PortraitLayout({ sRate, split, elapsed, tDist, avgRate, avgSplit, app, onToggle, onReset }) {
+export default function PortraitLayout({ sRate, split, elapsed, tDist, avgRate, avgSplit, app, onToggle, onReset, resetLocked }) {
   const { t } = useLang();
 
   const rateClass = 'p-rate' + (sRate === 0 ? '' : sRate < 32 ? ' active' : ' warn');
@@ -47,7 +47,7 @@ export default function PortraitLayout({ sRate, split, elapsed, tDist, avgRate, 
           <button
             className={`ctrl-btn ${isRunning ? 'stop' : 'reset'}`}
             onClick={dangerAction}
-            disabled={app === 'idle'}
+            disabled={app === 'idle' || resetLocked}
           >{dangerText}</button>
         </div>
       </div>

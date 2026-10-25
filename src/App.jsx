@@ -34,7 +34,7 @@ export default function App() {
     app, sRate, sCount, tDist, elapsed, curSpd,
     sOk, sOn, gpsPermOk, gpsGot,
     toggleRun, doReset, requestPermissions,
-    hasRecording, downloadRecording,
+    hasRecording, downloadRecording, resetLocked,
     setSens, setCurSpd,
     currentStrokeSamples, prevStrokeSamples, strokePeak,
     stroke,
@@ -61,6 +61,7 @@ export default function App() {
   }
 
   function handleReset() {
+    if (resetLocked) return;
     doReset();
     mapRef.current?.resetTrack();
   }
@@ -90,7 +91,7 @@ export default function App() {
           <CenterPanel
             sRate={sRate} sOn={sOn} split={split}
             app={app} onToggle={toggleRun} onReset={handleReset}
-            onSensChange={setSens} sensFillRef={sensFillRef}
+            onSensChange={setSens} sensFillRef={sensFillRef} resetLocked={resetLocked}
           />
           <RightPanel
             time={fmtT(elapsed)}
@@ -111,7 +112,7 @@ export default function App() {
           elapsed={fmtT(elapsed)}
           tDist={{ val: distVal, unit: distUnit }}
           avgRate={avgRate} avgSplit={avgSplit}
-          app={app} onToggle={toggleRun} onReset={handleReset}
+          app={app} onToggle={toggleRun} onReset={handleReset} resetLocked={resetLocked}
         />
       </div>
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLang } from '../../context/LangContext';
 
-export default function ControlBlock({ app, onToggle, onReset, onSensChange, sOn }) {
+export default function ControlBlock({ app, onToggle, onReset, onSensChange, sOn, resetLocked }) {
   const { t } = useLang();
   const [sensVal, setSensVal] = useState(3);
 
@@ -31,7 +31,7 @@ export default function ControlBlock({ app, onToggle, onReset, onSensChange, sOn
         <button
           className={`ctrl-btn ${isRunning ? 'stop' : 'reset'}`}
           onClick={dangerAction}
-          disabled={app === 'idle'}
+          disabled={app === 'idle' || resetLocked}
         >{dangerText}</button>
       </div>
     </div>

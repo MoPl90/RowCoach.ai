@@ -4,6 +4,8 @@ import { useGPS } from './useGPS';
 import { useWakeLock } from './useWakeLock';
 import { useRecorder } from './useRecorder';
 
+const RESET_LOCK_MS = 1500;
+
 export function useSession({ mapRef, sensFillRef, record }) {
   // ── State ──
   const [app, setApp] = useState('idle');
@@ -17,12 +19,14 @@ export function useSession({ mapRef, sensFillRef, record }) {
   const [gpsPermOk, setGpsPermOk] = useState(false);
   const [gpsGot, setGpsGot] = useState(false);
   const [hasRecording, setHasRecording] = useState(false);
+  const [resetLocked, setResetLocked] = useState(false);
 
   // ── Refs ──
   const runStart = useRef(null);
   const pauseAccum = useRef(0);
   const tickId = useRef(null);
   const decayId = useRef(null);
+  const resetLockId = useRef(null);
   const recent = useRef([]);
   const recentStrokeTimes = useRef([]);
   const appRef = useRef('idle');
@@ -39,7 +43,6 @@ export function useSession({ mapRef, sensFillRef, record }) {
   function updateTDist(delta) {
     tDistRef.current += delta;
     setTDist(tDistRef.current);
-    gpsUpdateDistRef(tDistRef.current);
   }
 
   const { wlOn, wlOff } = useWakeLock();
@@ -77,7 +80,12 @@ export function useSession({ mapRef, sensFillRef, record }) {
     }
 
     clearTimeout(decayId.current);
-    decayId.current = setTimeout(() => setSRate(0), 5000);
+    decayId.current = setTimeout(() => {
+      setSRate(0);
+      // Rowing stopped: drop old strokes so the gap doesn't drag down the next rate
+      recent.current = [];
+      recentStrokeTimes.current = [];
+    }, 5000);
   }, []);
 
   // ── Motion sensor ──
@@ -117,7 +125,7 @@ export function useSession({ mapRef, sensFillRef, record }) {
     setGpsGot(prev => prev || true);
   }
 
-  const { gpsOn, gpsOff, resetGPS, tPts, updateDistRef: gpsUpdateDistRef } = useGPS({
+  const { gpsOn, gpsOff, resetGPS, tPts } = useGPS({
     onDistUpdate,
     onSpdUpdate,
     onGpsGot,
@@ -183,6 +191,10 @@ export function useSession({ mapRef, sensFillRef, record }) {
       setElapsed(pauseAccum.current + Math.floor((Date.now() - runStart.current) / 1000));
       updateApp('paused');
       recorder.event('pause');
+      // Stop turns into Reset in the same spot; block it briefly so a double tap can't wipe the session
+      setResetLocked(true);
+      clearTimeout(resetLockId.current);
+      resetLockId.current = setTimeout(() => setResetLocked(false), RESET_LOCK_MS);
       gpsOff();
       tickOff();
       wlOff();
@@ -191,6 +203,7 @@ export function useSession({ mapRef, sensFillRef, record }) {
 
   // ── Reset ──
   function doReset() {
+    if (resetLocked) return;
     updateApp('idle');
     setSRate(0);
     setSCount(0);
@@ -238,7 +251,7 @@ export function useSession({ mapRef, sensFillRef, record }) {
     app, sRate, sCount, tDist, elapsed, curSpd,
     sOk, sOn, gpsPermOk, gpsGot,
     toggleRun, doReset, requestPermissions,
-    hasRecording, downloadRecording: recorder.download,
+    hasRecording, downloadRecording: recorder.download, resetLocked,
     setSens, setCurSpd,
     currentStrokeSamples, prevStrokeSamples, strokePeak,
     stroke,
