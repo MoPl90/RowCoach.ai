@@ -94,11 +94,13 @@ The domain `row-pacer.app` is registered and managed through Cloudflare.
 | A     | `@`  | `185.199.111.153`   |
 | CNAME | `www`| `mopl90.github.io`  |
 
-> Proxy must be **DNS only** (not proxied) — Cloudflare's orange-cloud proxy breaks GitHub Pages domain verification.
+> Proxy must be **DNS only** (gray cloud) on all records. With Cloudflare's orange-cloud proxy, GitHub Pages can't issue a certificate for the domain or verify it, and the Cloudflare → GitHub hop isn't verified HTTPS.
 
 The `public/CNAME` file in the repo contains `row-pacer.app` so GitHub Pages serves on the custom domain after each deploy.
 
-HTTPS is handled automatically by GitHub Pages once DNS resolves.
+HTTPS is provided by GitHub Pages. Once DNS resolves to the GitHub IPs, GitHub issues the certificate (can take up to an hour); then enable **Settings → Pages → Enforce HTTPS**.
+
+**Domain verification:** to stop anyone else from claiming the domain for their own Pages site, verify it under **GitHub → Settings (account) → Pages → Add a domain** and add the `_github-pages-challenge-MoPl90` TXT record it shows in Cloudflare.
 
 ## Credits
 
